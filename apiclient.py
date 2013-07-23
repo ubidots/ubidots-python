@@ -28,7 +28,7 @@ class ServerBridge(object):
         return real_decorator
 
     def _get_token(self):
-        self._token = self._post_with_apikey('auth/token').json['token']
+        self._token = self._post_with_apikey('auth/token').json()['token']
         self._token_header = {'X-AUTH-TOKEN': self._token}
 
     def initialize(self):
@@ -98,17 +98,17 @@ class ApiObject(object):
 class Datasource(ApiObject):
 
     def remove(self):
-        response = self.bridge.delete('datasources/'+ self.id).json
+        response = self.bridge.delete('datasources/'+ self.id).json()
         return response
 
     def variables(self):
         response = self.bridge.get('datasources/'+self.id+'/variables')
-        variables = self.api._transform_to_variable_objects(response.json)
+        variables = self.api._transform_to_variable_objects(response.json())
         return variables
 
     def create_variable(self, data):
         response = self.bridge.post('datasources/'+self.id+'/variables', data)
-        return Variable(response.json, self.api, datasource= self)
+        return Variable(response.json(), self.api, datasource= self)
 
     def __repr__(self):
         return self.name
@@ -121,14 +121,14 @@ class Variable(ApiObject):
         self.datasource = self._get_datasource(**kwargs)    
 
     def values(self):
-        return self.bridge.get('variables/'+self.id+'/values').json
+        return self.bridge.get('variables/'+self.id+'/values').json()
 
     def save_value(self, data):
         dummy = data['value']
-        return self.bridge.post('variables/'+ self.id +'/values', data).json
+        return self.bridge.post('variables/'+ self.id +'/values', data).json()
 
     def remove(self):
-        return self.bridge.delete('variables/'+self.id).json
+        return self.bridge.delete('variables/'+self.id).json()
 
     def _get_datasource(self, **kwargs):
         datasource = kwargs.get('datasource',None)
@@ -147,7 +147,7 @@ class ApiClient(object):
         self.bridge = ServerBridge(apikey)
 
     def datasources(self):
-        raw_datasources = self.bridge.get('datasources').json
+        raw_datasources = self.bridge.get('datasources').json()
         return self._transform_to_datasource_objects(raw_datasources)
 
     def datasource(self, id=None, url=None):
@@ -155,22 +155,22 @@ class ApiClient(object):
             raise ValueError("id or url required")
 
         if id:
-            raw_datasource = self.bridge.get('datasources/'+ str(id) ).json
+            raw_datasource = self.bridge.get('datasources/'+ str(id) ).json()
         elif url:
-            raw_datasource = self.bridge.get_with_url(url).json
+            raw_datasource = self.bridge.get_with_url(url).json()
 
         return Datasource(raw_datasource, self)
 
     def create_datasource(self, data):
-        raw_datasource = self.bridge.post('datasources/', data).json
+        raw_datasource = self.bridge.post('datasources/', data).json()
         return Datasource(raw_datasource, self)
 
     def variables(self):
-        raw_variables = self.bridge.get('variables').json
+        raw_variables = self.bridge.get('variables').json()
         return self.transform_to_variables_objects(raw_variables)
 
     def variable(self, id):
-        raw_variable = self.bridge.get('variables/'+ str(id) ).json
+        raw_variable = self.bridge.get('variables/'+ str(id) ).json()
         return Variable(raw_variable, self)
 
 
