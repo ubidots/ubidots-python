@@ -21,7 +21,7 @@ class ServerBridge(object):
                     if response.status_code not in list_of_error_codes:
                         return response
                     else:
-                        print "Error de autorizacion, actualizando token"
+                        print "Authorization error, updating token"
                         self.initialize()
                 return response
             return wrapped_f

@@ -1,3 +1,17 @@
 *.pyc
 *.swp
 apikey.txt
+*.log
+*.egg
+*.db
+*.pid
+.coverage
+.DS_Store
+pip-log.txt
+/*.egg-info
+/build
+/cover
+/dist
+bin/
+include/
+lib/
