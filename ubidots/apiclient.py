@@ -97,11 +97,11 @@ class ApiObject(object):
 
 class Datasource(ApiObject):
 
-    def remove(self):
+    def remove_datasource(self):
         response = self.bridge.delete('datasources/'+ self.id).json()
         return response
 
-    def variables(self):
+    def get_variables(self):
         response = self.bridge.get('datasources/'+self.id+'/variables')
         variables = self.api._transform_to_variable_objects(response.json())
         return variables
@@ -120,14 +120,14 @@ class Variable(ApiObject):
         super(Variable, self).__init__(raw_data, api, *args, **kwargs)
         self.datasource = self._get_datasource(**kwargs)    
 
-    def values(self):
+    def get_values(self):
         return self.bridge.get('variables/'+self.id+'/values').json()
 
     def save_value(self, data):
         dummy = data['value']
         return self.bridge.post('variables/'+ self.id +'/values', data).json()
 
-    def remove(self):
+    def remove_variable(self):
         return self.bridge.delete('variables/'+self.id).json()
 
     def _get_datasource(self, **kwargs):
@@ -146,11 +146,11 @@ class ApiClient(object):
     def __init__(self, apikey):
         self.bridge = ServerBridge(apikey)
 
-    def datasources(self):
+    def get_datasources(self):
         raw_datasources = self.bridge.get('datasources').json()
         return self._transform_to_datasource_objects(raw_datasources)
 
-    def datasource(self, id=None, url=None):
+    def get_datasource(self, id=None, url=None):
         if not id and not url:
             raise ValueError("id or url required")
 
@@ -165,11 +165,11 @@ class ApiClient(object):
         raw_datasource = self.bridge.post('datasources/', data).json()
         return Datasource(raw_datasource, self)
 
-    def variables(self):
+    def get_variables(self):
         raw_variables = self.bridge.get('variables').json()
         return self.transform_to_variables_objects(raw_variables)
 
-    def variable(self, id):
+    def get_variable(self, id):
         raw_variable = self.bridge.get('variables/'+ str(id) ).json()
         return Variable(raw_variable, self)
 
