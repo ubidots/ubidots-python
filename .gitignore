@@ -15,3 +15,4 @@ pip-log.txt
 bin/
 include/
 lib/
+/docs/
