@@ -2,9 +2,9 @@
 Ubidots Python API Client
 ===================================
 
-The Ubidots Python API Client makes calls to the `Ubidots Api <http://things.ubidots.com/api>`_  The module is available on PyPi_ as  ubidots
+The Ubidots Python API Client makes calls to the `Ubidots Api <http://things.ubidots.com/api>`_  The module is available on `PyPi <https://pypi.python.org/pypi/ubidots/>`_ as  ubidots
 
-To follow this quickstart you'll need to install python 2.7 in your machine (either be it a computer or an python-capable device), you can find more details `here <http://www.python.org/download/>`_.
+To follow this quickstart you'll need to install python 2.7 in your machine (either be it a computer or an python-capable device), you can find more details in `<http://www.python.org/download/>`_.
 
 
 Installing the Python library
@@ -28,7 +28,7 @@ If you are using Microsoft Windows you can install pip from `here <http://www.lf
 
 
 Connecting to the API
-------------------
+----------------------
 
 Before playing with the API you must be able to connect to it using your private API key, which can be found `in your profile <http://app.ubidots.com/userdata/api/>`_.
 
@@ -48,7 +48,7 @@ Now you have an instance of the apiclient ("api") which can be used to connect t
 
 
 Creating a DataSource
--------------------
+----------------------
 
 As you might know by now, a data source representes a device or a virtual source.
 
@@ -63,7 +63,7 @@ This new data source can be used to track different variables, so let's create o
 
 
 Creating a Variable
------------------
+--------------------
 
 A variable is a time-series containing different values over time. Let's create one:
 
@@ -77,7 +77,7 @@ Now you have a new variable, so let's create a new value for this variable.
 
 
 Saving a new Value to a Variable
-------------------------------
+--------------------------------
 
 Given the instantiated variable, you can save a new value with the following line:
 
@@ -113,7 +113,7 @@ You may also want to get the last value of certain variable with this purpose, f
     last_value = new_variable.last_value
 
 Getting all the Data sources
----------------------------
+-----------------------------
 
 If you want to get all your data sources you can use the instance of the api directly:
 
@@ -136,7 +136,7 @@ For example, if a data source has the id 51c99cfdf91b28459f976414, it can be ret
 
 
 Getting All Variables from a Data source
----------------------------------------
+-----------------------------------------
 
 You can also retrieve all the variables of a data source:
 
