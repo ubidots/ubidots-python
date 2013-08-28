@@ -1,66 +1,165 @@
 ===================================
-Ubidots Python Api Client
+Ubidots Python API Client
 ===================================
 
 The Ubidots Python API Client makes calls to the `Ubidots Api <http://things.ubidots.com/api>`_  The module is available on PyPi_ as  ubidots
 
+To follow this quickstart you'll need to install python 2.7 in your machine (either be it a computer or an python-capable device), you can find more details `here <http://www.python.org/download/>`_.
 
-Quick Start
-===========
+|
 
-#. Create an account in `Ubidots <http://ubidots.com>`_ if you don't
-   have one.
+Installing the Python library
+-----------------------------
 
-#. Create de directory myfirstdirective.
+Ubidots for python is available in Pypi and you can install it from the comand line:
 
-#. Install ubidots.
+.. code-block:: bash
 
-   .. code-block:: bash
+    $ pip install ubidots
 
-      $ pip install ubidots
+Don't forget to use sudo if necessary.
 
+You can install pip in Linux and Mac using this command:
 
-#. Go to your api_ spot and copy your apikey into a file called
-   apikey.txt inside myfirsdirective directory.
-#. Inside myfirstdatasource create the file myfirstdirective.py and
-   copy the next code:
+.. code-block:: bash
 
-   .. code-block:: python
+    $ easy_install pip
 
-      from ubidots import ApiClient
-      import random
+If you are using Microsoft Windows you can install pip from `here <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pip>`_.
 
-      apikey = None
-      with open('apikey.txt') as f:
-          apikey =  f.readline()
+|
 
-      #Create an instance of the client with your apikey
-      api = ApiClient(apikey)
+Connecting to the API
+------------------
 
-      #Create your fist datasource
-      ds = api.create_datasource({'name':'firstds'})
+Before playing with the API you must be able to connect to it using your private API key, which can be found `in your profile <http://app.ubidots.com/userdata/api/>`_.
 
-      #Create your first variable
-      var =  ds.create_variable({'name':'firstvar', 'unit':'rand'})
+If you don't have an account yet, you can `create one here <http://app.ubidots.com/accounts/signup/>`_.
 
-      #Create 10 new values in your new variable
-      for i in range(10):
-          var.save_value({'value':random.randint(1,10)})
+Once you have your API key, you can connect to the API by creating an ApiClient instance. Let's assume your API key is: "7fj39fk3044045k89fbh34rsd9823jkfs8323" then your code would look like this:
 
 
-#. Run it:
+.. code-block:: python
 
-   .. code-block:: bash
+    from ubidots import ApiClient
 
-      $ python myfirstdirective.py
-
-#. Thats all!!!
-
-No you can go to `your account <http://app.ubidots.com>`_ in Ubitods
-and under the data tab you can see your datasource, your variable and
-your posted values!
+    api = ApiClient('7fj39fk3044045k89fbh34rsd9823jkfs8323')
 
 
+Now you have an instance of the apiclient ("api") which can be used to connect to the API service.
 
-.. _PyPi: http://pypi.python.org/pypi/ubidots/
-.. _api: http://app.ubidots.com/userdata/api/
+|
+
+Creating a DataSource
+-------------------
+
+As you might know by now, a data source representes a device or a virtual source.
+
+This line creates a new data source:
+
+.. code-block:: python
+
+    new_datasource = api.create_datasource({"name":"myNewDs"})
+
+
+This new data source can be used to track different variables, so let's create one.
+
+|
+
+Creating a Variable
+-----------------
+
+A variable is a time-series containing different values over time. Let's create one:
+
+
+.. code-block:: python
+
+    new_variable = new_datasource.create_variable({"name":"myNewVar"})
+
+
+Now you have a new variable, so let's create a new value for this variable.
+
+|
+
+Saving a new Value to a Variable
+------------------------------
+
+Given the instantiated variable, you can save a new value with the following line:
+
+.. code-block:: python
+
+    new_value = new_variable.save_value({'value':10})
+
+You can also specify a timestamp (optional)
+
+.. code-block:: python
+
+    new_value = new_variable.save_value({'value':10, 'timestamp':1376061804407})
+
+If no timestamp is specified, the API server will asign the current time to it. We think it's always better that you specify the timestamp so that
+it reflects the exact time when the value was captures, and not the time when it got to our servers.
+
+
+|
+
+Getting Values
+--------------
+
+To get the values for a variable, use the method get_values in an instance of the class Variable.
+
+.. code-block:: python
+
+    all_values = new_variable.get_values()
+
+
+You may also want to get the last value of certain variable with this purpose, first you need to update the variable:
+
+.. code-block:: python
+
+    new_variable = api.get_variable(new_variable.id)
+    last_value = new_variable.last_value
+
+|
+Getting all the Data sources
+---------------------------
+
+If you want to get all your data sources you can use the instance of the api directly:
+
+.. code-block:: python
+
+    all_my_datasources = api.get_datasources()
+
+|
+Getting a specific Data source
+------------------------------
+
+Each data source has a unique id that tells the server which one to retrieve.
+
+For example, if a data source has the id 51c99cfdf91b28459f976414, it can be retrieved using the method get_datasource of the ApiClient instance:
+
+
+.. code-block:: python
+
+    my_specific_datasource = api.get_datasource(id = '51c99cfdf91b28459f976414')
+
+
+|
+Getting All Variables from a Data source
+---------------------------------------
+
+You can also retrieve all the variables of a data source:
+
+.. code-block:: python
+
+    all_datasource_variables = datasource.get_get_variables()
+
+
+|
+Getting a specific Variable
+------------------------------
+
+As with data sources, use your variable's id to retrieve the details about a variable:
+
+.. code-block:: python
+
+    my_specific_variable = api.get_variable(id = '56799cf1231b28459f976417')
