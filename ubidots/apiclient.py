@@ -133,9 +133,8 @@ class Variable(ApiObject):
     def _get_datasource(self, **kwargs):
         datasource = kwargs.get('datasource',None)
         if not datasource:
-            datasource = self.api.datasource(url = self.datasource['url'])
+            datasource = self.api.get_datasource(url = self.datasource['url'])
         return datasource
-
 
     def __repr__(self):
         return self.name
