@@ -6,7 +6,6 @@ The Ubidots Python API Client makes calls to the `Ubidots Api <http://things.ubi
 
 To follow this quickstart you'll need to install python 2.7 in your machine (either be it a computer or an python-capable device), you can find more details `here <http://www.python.org/download/>`_.
 
-|
 
 Installing the Python library
 -----------------------------
@@ -27,7 +26,6 @@ You can install pip in Linux and Mac using this command:
 
 If you are using Microsoft Windows you can install pip from `here <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pip>`_.
 
-|
 
 Connecting to the API
 ------------------
@@ -48,7 +46,6 @@ Once you have your API key, you can connect to the API by creating an ApiClient 
 
 Now you have an instance of the apiclient ("api") which can be used to connect to the API service.
 
-|
 
 Creating a DataSource
 -------------------
@@ -64,7 +61,6 @@ This line creates a new data source:
 
 This new data source can be used to track different variables, so let's create one.
 
-|
 
 Creating a Variable
 -----------------
@@ -79,7 +75,6 @@ A variable is a time-series containing different values over time. Let's create 
 
 Now you have a new variable, so let's create a new value for this variable.
 
-|
 
 Saving a new Value to a Variable
 ------------------------------
@@ -100,8 +95,6 @@ If no timestamp is specified, the API server will asign the current time to it. 
 it reflects the exact time when the value was captures, and not the time when it got to our servers.
 
 
-|
-
 Getting Values
 --------------
 
@@ -119,7 +112,6 @@ You may also want to get the last value of certain variable with this purpose, f
     new_variable = api.get_variable(new_variable.id)
     last_value = new_variable.last_value
 
-|
 Getting all the Data sources
 ---------------------------
 
@@ -129,7 +121,7 @@ If you want to get all your data sources you can use the instance of the api dir
 
     all_my_datasources = api.get_datasources()
 
-|
+
 Getting a specific Data source
 ------------------------------
 
@@ -143,7 +135,6 @@ For example, if a data source has the id 51c99cfdf91b28459f976414, it can be ret
     my_specific_datasource = api.get_datasource(id = '51c99cfdf91b28459f976414')
 
 
-|
 Getting All Variables from a Data source
 ---------------------------------------
 
@@ -154,7 +145,6 @@ You can also retrieve all the variables of a data source:
     all_datasource_variables = datasource.get_get_variables()
 
 
-|
 Getting a specific Variable
 ------------------------------
 
