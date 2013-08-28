@@ -7,7 +7,7 @@ def read_file(name):
 
 setup(
     name='ubidots',
-    version='0.1.2-alpha',
+    version='0.1.3-alpha',
     author='Ubidots Team',
     author_email='devel@ubidots.com',
     url='https://github.com/ubidots/ubidots-python/',
