@@ -142,7 +142,7 @@ You can also retrieve all the variables of a data source:
 
 .. code-block:: python
 
-    all_datasource_variables = datasource.get_get_variables()
+    all_datasource_variables = datasource.get_variables()
 
 
 Getting a specific Variable
