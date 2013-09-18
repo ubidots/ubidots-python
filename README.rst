@@ -50,7 +50,7 @@ Now you have an instance of the apiclient ("api") which can be used to connect t
 Creating a DataSource
 ----------------------
 
-As you might know by now, a data source representes a device or a virtual source.
+As you might know by now, a data source represents a device or a virtual source.
 
 This line creates a new data source:
 
