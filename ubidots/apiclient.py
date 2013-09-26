@@ -1,13 +1,16 @@
 import requests
 import json
 
+BASE_URL = 'http://app.ubidots.com/api/'
+
+
 class ServerBridge(object):
     '''
     Responsabilites: Make petitions to the browser with the right headers and arguments
     '''
 
     def __init__(self, apikey):
-        self.base_url = 'http://app.ubidots.com/api/'
+        self.base_url = BASE_URL
         self._token = None
         self._apikey = apikey
         self._apikey_header = {'X-UBIDOTS-APIKEY': self._apikey}
