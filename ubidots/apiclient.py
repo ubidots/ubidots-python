@@ -127,6 +127,12 @@ class Variable(ApiObject):
         dummy = data['value']
         return self.bridge.post('variables/'+ self.id +'/values', data).json()
 
+    def save_values(self, data):
+        for element in data:
+            dummy = element['value']
+            dummy = element['timestamp']
+        return self.bridge.post('variables/'+ self.id +'/values', data).json()
+
     def remove_variable(self):
         return self.bridge.delete('variables/'+self.id).json()
 
