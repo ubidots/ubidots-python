@@ -95,6 +95,21 @@ If no timestamp is specified, the API server will asign the current time to it. 
 it reflects the exact time when the value was captures, and not the time when it got to our servers.
 
 
+Saving Values in Bulk
+---------------------
+
+Values may also be added in bulk. This is especially useful when data is gathered offline and connection to the internet is limited.
+
+.. code-block:: python
+
+   new_variable.save_values([
+       {'timestamp': 1380558972614, 'value': 20},
+       {'timestamp': 1380558972915, 'value': 40},
+       {'timestamp': 1380558973516, 'value': 50},
+       {'timestamp': 1380558973617, 'value': 30}
+   ])
+
+
 Getting Values
 --------------
 
