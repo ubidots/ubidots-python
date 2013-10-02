@@ -183,6 +183,11 @@ class ApiClient(object):
         raw_variable = self.bridge.get('variables/'+ str(id) ).json()
         return Variable(raw_variable, self)
 
+    def save_collection(self, data):
+        for element in data:
+            dummy = element['variable']
+            dummy = element['value']
+        return self.bridge.post("collections/values", data).json()
 
     def _transform_to_datasource_objects(self, raw_datasources):
         datasources = []
