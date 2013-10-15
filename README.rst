@@ -46,6 +46,29 @@ Once you have your API key, you can connect to the API by creating an ApiClient 
 
 Now you have an instance of the apiclient ("api") which can be used to connect to the API service.
 
+Saving a new Value to a Variable
+--------------------------------
+
+Retrieve the variable you'd like the value to be saved to:
+
+.. code-block:: python
+
+    my_variable = api.get_variable(id = '56799cf1231b28459f976417')
+
+Given the instantiated variable, you can save a new value with the following line:
+
+.. code-block:: python
+
+    new_value = my_variable.save_value({'value':10})
+
+You can also specify a timestamp (optional)
+
+.. code-block:: python
+
+    new_value = my_variable.save_value({'value':10, 'timestamp':1376061804407})
+
+If no timestamp is specified, the API server will assign the current time to it. We think it's always better that you specify the timestamp so that
+it reflects the exact time when the value was captured, and not the time when it got to our servers.
 
 Creating a DataSource
 ----------------------
@@ -72,27 +95,6 @@ A variable is a time-series containing different values over time. Let's create 
 
     new_variable = new_datasource.create_variable({"name":"myNewVar"})
 
-
-Now you have a new variable, so let's create a new value for this variable.
-
-
-Saving a new Value to a Variable
---------------------------------
-
-Given the instantiated variable, you can save a new value with the following line:
-
-.. code-block:: python
-
-    new_value = new_variable.save_value({'value':10})
-
-You can also specify a timestamp (optional)
-
-.. code-block:: python
-
-    new_value = new_variable.save_value({'value':10, 'timestamp':1376061804407})
-
-If no timestamp is specified, the API server will asign the current time to it. We think it's always better that you specify the timestamp so that
-it reflects the exact time when the value was captures, and not the time when it got to our servers.
 
 
 Saving Values in Bulk
