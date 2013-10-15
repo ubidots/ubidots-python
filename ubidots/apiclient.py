@@ -9,11 +9,16 @@ class ServerBridge(object):
     Responsabilites: Make petitions to the browser with the right headers and arguments
     '''
 
-    def __init__(self, apikey):
+    def __init__(self, apikey, auth):
+        '''
+        apikey: str
+        auth: None or (user, pass)
+        '''
         self.base_url = BASE_URL
         self._token = None
         self._apikey = apikey
         self._apikey_header = {'X-UBIDOTS-APIKEY': self._apikey}
+        self._auth = auth
         self.initialize()
 
     def try_again(list_of_error_codes, number_of_tries=2):
@@ -40,31 +45,31 @@ class ServerBridge(object):
 
     def _post_with_apikey(self, path):
         headers = self._prepare_headers(self._apikey_header)
-        response = requests.post(self.base_url + path, headers =  headers)
+        response = requests.post(self.base_url + path, headers=headers, auth=self._auth)
         return response
 
     @try_again([403, 401])
     def get(self, path):
         headers = self._prepare_headers(self._token_header)
-        response = requests.get(self.base_url + path, headers = headers)
+        response = requests.get(self.base_url + path, headers=headers, auth=self._auth)
         return response
 
     def get_with_url(self, url):
         headers = self._prepare_headers(self._token_header)
-        response = requests.get(url, headers = headers)
+        response = requests.get(url, headers=headers, auth=self._auth)
         return response
 
     @try_again([403, 401])
     def post(self, path, data):
         headers = self._prepare_headers(self._token_header)
         data = self._prepare_data(data)
-        response = requests.post(self.base_url + path, data=data, headers = headers)
+        response = requests.post(self.base_url + path, data=data, headers=headers, auth=self._auth)
         return response
 
     @try_again([403, 401])
     def delete(self, path):
         headers = self._prepare_headers(self._token_header)
-        response = requests.delete(self.base_url + path, headers = headers)
+        response = requests.delete(self.base_url + path, headers=headers, auth=self._auth)
         return response
 
 
@@ -153,8 +158,8 @@ class Variable(ApiObject):
 
 
 class ApiClient(object):
-    def __init__(self, apikey):
-        self.bridge = ServerBridge(apikey)
+    def __init__(self, apikey, auth=None):
+        self.bridge = ServerBridge(apikey, auth)
 
     def get_datasources(self):
         raw_datasources = self.bridge.get('datasources').json()
