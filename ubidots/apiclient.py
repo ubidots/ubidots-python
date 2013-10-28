@@ -209,7 +209,7 @@ class Variable(ApiObject):
 
         return self.bridge.post('variables/'+ self.id +'/values', data).json()
 
-    @validate_input(list, ["key", "timestamp"])
+    @validate_input(list, ["value", "timestamp"])
     def save_values(self, data, force=False):
         if not all(isinstance(e['timestamp'], int) for e in data):
             raise UbidotsInvalidInputError('Key "timestamp" must point to an int value.')
