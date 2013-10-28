@@ -68,21 +68,7 @@ def validate_input(type, required_keys=[]):
 
     If validation fails, UbidotsInvalidInputError is raised and the function
     is not called.
-
-    Usage:
-
-      @validate_input(dict, ['name'])
-      def foo(self, data):
-          # We can now assume that data is a dict and has the key 'name':
-          bar(data['name'])
-
-      @validate_input(list, ['name'])
-      def foo(self, data):
-          # We can now assume that data is a list of dicts and has each has
-          # the key 'name':
-          for elem in data:
-              bar(elem['name'])
-    '''
+    """
     def real_decorator(fn):
         def wrapped_f(self, *args, **kwargs):
             if not isinstance(args[0], type):
