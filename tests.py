@@ -89,3 +89,6 @@ class TestDecorators(unittest.TestCase):
 		wrapper = real_decorator(fn)
 		self.assertRaises(Error400, wrapper, Mock() )
 		self.assertRaises(Error500, wrapper, Mock() )
+
+if __name__ == '__main__':
+	unittest.main()
