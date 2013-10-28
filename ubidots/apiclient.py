@@ -67,7 +67,7 @@ def validate_input(type, required_keys=[]):
     Args:
       type           Required type of the first argument
       required_keys  If the first argument is a dict or list, checks for existance
-                     of required keys in argument or it's elements respectively.
+                     of required keys in argument or its elements respectively.
     '''
     def real_decorator(fn):
         def wrapped_f(self, *args, **kwargs):
