@@ -66,6 +66,9 @@ def validate_input(type, required_keys=[]):
     '''
     Decorator for validating input on the client side.
 
+    If validation fails, UbidotsInvalidInputError is raised and the function
+    is not called.
+
     Usage:
 
       @validate_input(dict, ['name'])
