@@ -1,5 +1,5 @@
 import unittest
-from ubidots.apiclient import ServerBridge, try_again, Error400, Error500, raise_informative_exception
+from ubidots.apiclient import ServerBridge, try_again, UbidotsError400, UbidotsError500, raise_informative_exception
 from mock import patch, MagicMock, Mock
 import json
 
@@ -87,8 +87,8 @@ class TestDecorators(unittest.TestCase):
 		fn = Mock(side_effect = [response(error_codes[0]), response(error_codes[1])])
 		real_decorator = raise_informative_exception(error_codes)
 		wrapper = real_decorator(fn)
-		self.assertRaises(Error400, wrapper, Mock() )
-		self.assertRaises(Error500, wrapper, Mock() )
+		self.assertRaises(UbidotsError400, wrapper, Mock() )
+		self.assertRaises(UbidotsError500, wrapper, Mock() )
 
 if __name__ == '__main__':
 	unittest.main()
