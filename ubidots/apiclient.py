@@ -76,19 +76,12 @@ def validate_input(type, required_keys=[]):
           # We can now assume that data is a dict and has the key 'name':
           bar(data['name'])
 
-     or
-
       @validate_input(list, ['name'])
       def foo(self, data):
-          # We can now assume that data is a list of dicts and has each has the
-          # key 'name':
+          # We can now assume that data is a list of dicts and has each has
+          # the key 'name':
           for elem in data:
               bar(elem['name'])
-
-    Args:
-      type           Required type of the first argument
-      required_keys  If the first argument is a dict or list, checks for existance
-                     of required keys in argument or its elements respectively.
     '''
     def real_decorator(fn):
         def wrapped_f(self, *args, **kwargs):
