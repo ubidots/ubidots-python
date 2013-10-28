@@ -3,7 +3,7 @@ from ubidots.apiclient import ServerBridge
 from ubidots.apiclient import try_again
 from ubidots.apiclient import raise_informative_exception
 from ubidots.apiclient import validate_input
-from ubidots.apiclient import UbidotsError, UbidotsError400, UbidotsError500, UbidotsInvalidInputError
+from ubidots.apiclient import UbidotsError400, UbidotsError500, UbidotsInvalidInputError
 from mock import patch, MagicMock, Mock
 import json
 
