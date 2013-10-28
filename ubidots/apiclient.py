@@ -233,7 +233,7 @@ class Variable(ApiObject):
     @validate_input(list, ["key", "timestamp"])
     def save_values(self, data, force=False):
         if not all(isinstance(e['timestamp'], int) for e in data):
-            raise UbidotsInvalidInputError('Key "timestamp" must point to an int value')
+            raise UbidotsInvalidInputError('Key "timestamp" must point to an int value.')
 
         path = 'variables/'+ self.id +'/values'
         path += ('', '?force=true')[int(force)]
