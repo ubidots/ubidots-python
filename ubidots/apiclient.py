@@ -4,6 +4,53 @@ import json
 BASE_URL = 'http://app.ubidots.com/api/'
 
 
+class Error500(Exception):
+    pass
+
+
+class Error400(Exception):
+    pass
+
+class NoErrorClassAssigned(Exception):
+    pass
+
+
+def create_exception_object(code):
+    if code == 500:
+        return Error500("An Internal Server Error Ocurred")
+    elif code == 400:
+        return Error400("Your request is Invalid, details:")
+    else:
+        return NoErrorClassAssigned("there is an non classified error")
+
+
+
+def raise_informative_exception(list_of_error_codes):
+    def real_decorator(fn):
+        def wrapped_f(self, *args, **kwargs):
+            response = fn(self, *args, **kwargs)
+            if response.status_code in list_of_error_codes:
+                error = create_exception_object(response.status_code)
+                raise error
+            else:
+                return response
+        return wrapped_f
+    return real_decorator
+
+def try_again(list_of_error_codes, number_of_tries=2):
+    def real_decorator(fn):
+        def wrapped_f(self, *args, **kwargs):
+            for i in range(number_of_tries):
+                response = fn(self, *args, **kwargs)
+                if response.status_code not in list_of_error_codes:
+                    return response
+                else:
+                    self.initialize()
+            return response
+        return wrapped_f
+    return real_decorator
+
+
 class ServerBridge(object):
     '''
     Responsabilites: Make petitions to the browser with the right headers and arguments
@@ -16,19 +63,6 @@ class ServerBridge(object):
         self._apikey_header = {'X-UBIDOTS-APIKEY': self._apikey}
         self.initialize()
 
-    def try_again(list_of_error_codes, number_of_tries=2):
-        def real_decorator(fn):
-            def wrapped_f(self, *args, **kwargs):
-                for i in range(number_of_tries):
-                    response = fn(self, *args, **kwargs)
-                    if response.status_code not in list_of_error_codes:
-                        return response
-                    else:
-                        print "Authorization error, updating token"
-                        self.initialize()
-                return response
-            return wrapped_f
-        return real_decorator
 
     def _get_token(self):
         self._token = self._post_with_apikey('auth/token').json()['token']
@@ -37,13 +71,14 @@ class ServerBridge(object):
     def initialize(self):
         self._get_token()
 
-
+    @raise_informative_exception([400, 500, 401, 403])
     def _post_with_apikey(self, path):
         headers = self._prepare_headers(self._apikey_header)
         response = requests.post(self.base_url + path, headers =  headers)
         return response
 
     @try_again([403, 401])
+    @raise_informative_exception([400, 500])
     def get(self, path):
         headers = self._prepare_headers(self._token_header)
         response = requests.get(self.base_url + path, headers = headers)
@@ -55,6 +90,7 @@ class ServerBridge(object):
         return response
 
     @try_again([403, 401])
+    @raise_informative_exception([400, 500])
     def post(self, path, data):
         headers = self._prepare_headers(self._token_header)
         data = self._prepare_data(data)
@@ -62,6 +98,7 @@ class ServerBridge(object):
         return response
 
     @try_again([403, 401])
+    @raise_informative_exception([400, 500])
     def delete(self, path):
         headers = self._prepare_headers(self._token_header)
         response = requests.delete(self.base_url + path, headers = headers)
