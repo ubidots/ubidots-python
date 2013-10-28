@@ -245,14 +245,8 @@ class ApiClient(object):
             raise UbidotsInvalidInputError("id or url required")
 
         if id:
-            if not isinstance(id, basestring):
-                raise UbidotsInvalidInputError('Argument "id" must be a string.')
-
             raw_datasource = self.bridge.get('datasources/'+ str(id) ).json()
         elif url:
-            if not isinstance(url, basestring):
-                raise UbidotsInvalidInputError('Argument "url" must be a string.')
-
             raw_datasource = self.bridge.get_with_url(url).json()
 
         return Datasource(raw_datasource, self)
