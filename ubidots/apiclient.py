@@ -68,7 +68,7 @@ def validate_input(type, required_keys=[]):
 
     If validation fails, UbidotsInvalidInputError is raised and the function
     is not called.
-    """
+    '''
     def real_decorator(fn):
         def wrapped_f(self, *args, **kwargs):
             if not isinstance(args[0], type):
