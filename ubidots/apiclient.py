@@ -5,17 +5,19 @@ BASE_URL = 'http://app.ubidots.com/api/'
 
 
 class UbidotsError(Exception):
-    pass
+    """Generic Ubidots error"""
 
-class UbidotsError500(UbidotsError):
-    pass
 
 class UbidotsError400(UbidotsError):
-    pass
+    """Exception thrown when server returns status code 400"""
+
+
+class UbidotsError500(UbidotsError):
+    """Exception thrown when server returns status code 500"""
+
 
 class UbidotsInvalidInputError(UbidotsError):
     """Exception thrown when client-side verification fails"""
-    pass
 
 
 def create_exception_object(code, body):
@@ -63,6 +65,22 @@ def try_again(list_of_error_codes, number_of_tries=2):
 def validate_input(type, required_keys=[]):
     '''
     Decorator for validating input on the client side.
+
+    Usage:
+
+      @validate_input(dict, ['name'])
+      def foo(self, data):
+          # We can now assume that data is a dict and has the key 'name':
+          bar(data['name'])
+
+     or
+
+      @validate_input(list, ['name'])
+      def foo(self, data):
+          # We can now assume that data is a list of dicts and has each has the
+          # key 'name':
+          for elem in data:
+              bar(elem['name'])
 
     Args:
       type           Required type of the first argument
