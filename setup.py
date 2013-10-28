@@ -32,6 +32,11 @@ setup(
         "requests >= 1.2.3",
     ],
     test_suite='nose.collector',
-    tests_require=['nose', 'mock'],
-
+    tests_require=[
+        'ipdb == 0.7',
+        'ipython == 0.13.1',
+        'mock == 1.0.1',
+        'nose == 1.3.0',
+        'requests >= 1.2.3'
+    ]
 )
