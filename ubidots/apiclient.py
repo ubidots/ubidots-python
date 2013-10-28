@@ -88,6 +88,7 @@ def validate_input(type, required_keys=[]):
         return wrapped_f
     return real_decorator
 
+
 class ServerBridge(object):
     '''
     Responsabilites: Make petitions to the browser with the right headers and arguments

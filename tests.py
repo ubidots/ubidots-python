@@ -1,5 +1,9 @@
 import unittest
-from ubidots.apiclient import ServerBridge, try_again, UbidotsError400, UbidotsError500, raise_informative_exception
+from ubidots.apiclient import ServerBridge
+from ubidots.apiclient import try_again
+from ubidots.apiclient import raise_informative_exception
+from ubidots.apiclient import validate_input
+from ubidots.apiclient import UbidotsError, UbidotsError400, UbidotsError500, UbidotsInvalidInputError
 from mock import patch, MagicMock, Mock
 import json
 
@@ -89,6 +93,34 @@ class TestDecorators(unittest.TestCase):
 		wrapper = real_decorator(fn)
 		self.assertRaises(UbidotsError400, wrapper, Mock() )
 		self.assertRaises(UbidotsError500, wrapper, Mock() )
+
+	def test_raise_validate_input_decorator_dict(self):
+		fn = lambda *args, **kwargs: 911
+		real_decorator = validate_input(dict, ["a", "b", "c"])
+		wrapper = real_decorator(fn)
+
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), {})
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), {"a": 1})
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), {"a": 1, "b": 1})
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), {"a": 1, "b": 1, "d": 1})
+
+		self.assertEqual(wrapper(Mock(), {"a": 1, "b": 1, "c": 1}), 911)
+
+	def test_raise_validate_input_decorator_list(self):
+		fn = lambda *args, **kwargs: 911
+		real_decorator = validate_input(list, ["p", "q"])
+		wrapper = real_decorator(fn)
+
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), dict)
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{}])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p"}])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p", "q"}, []])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p", "q"}, {}])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p", "q"}, {"p"}])
+
+		self.assertEqual(wrapper(Mock(), [{"p": 1, "q": 1}]), 911)
+		self.assertEqual(wrapper(Mock(), [{"p": 1, "q": 1}, {"p": 2, "q": 2}]), 911)
 
 if __name__ == '__main__':
 	unittest.main()
