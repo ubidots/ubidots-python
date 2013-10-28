@@ -26,11 +26,15 @@ You can install pip in Linux and Mac using this command:
 
 If you are using Microsoft Windows you can install pip from `here <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pip>`_.
 
-Running the tests
+Running Tests
 -----------------------------
 
-If you want to run the tests install the libraries on the file requests.pip and from the root directory of the project run
-the command nosetests.
+To run the tests, execute the following from the root directory:
+
+.. code-block:: bash
+
+    $ python setup.py test
+
 
 
 Connecting to the API

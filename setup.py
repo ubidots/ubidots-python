@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-
+import multiprocessing # http://bugs.python.org/issue15881#msg170215
 
 def read_file(name):
     with open(name, "r") as f:
@@ -31,4 +31,7 @@ setup(
     install_requires=[
         "requests >= 1.2.3",
     ],
+    test_suite='nose.collector',
+    tests_require=['nose', 'mock'],
+
 )
