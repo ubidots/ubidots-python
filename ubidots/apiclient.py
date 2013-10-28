@@ -4,25 +4,24 @@ import json
 BASE_URL = 'http://app.ubidots.com/api/'
 
 
-class Error500(Exception):
+class UbidotsError(Exception):
+    pass
+
+class UbidotsError500(UbidotsError):
+    pass
+
+class UbidotsError400(UbidotsError):
     pass
 
 
-class Error400(Exception):
-    pass
-
-class NoErrorClassAssigned(Exception):
-    pass
-
-
-def create_exception_object(code):
+def create_exception_object(code, body):
+    """Creates an Exception object for an erronous status code."""
     if code == 500:
-        return Error500("An Internal Server Error Ocurred")
+        return UbidotsError500("An Internal Server Error Occurred.")
     elif code == 400:
-        return Error400("Your request is Invalid, details:")
+        return UbidotsError400("Your request is invalid:\n  " + body)
     else:
-        return NoErrorClassAssigned("there is an non classified error")
-
+        return UbidotsError(body)
 
 
 def raise_informative_exception(list_of_error_codes):
@@ -30,7 +29,7 @@ def raise_informative_exception(list_of_error_codes):
         def wrapped_f(self, *args, **kwargs):
             response = fn(self, *args, **kwargs)
             if response.status_code in list_of_error_codes:
-                error = create_exception_object(response.status_code)
+                error = create_exception_object(response.status_code, response.content or '')
                 raise error
             else:
                 return response
