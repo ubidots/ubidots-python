@@ -115,9 +115,9 @@ class TestDecorators(unittest.TestCase):
 		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), dict)
 		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{}])
 		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p"}])
-		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p", "q"}, []])
-		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p", "q"}, {}])
-		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p", "q"}, {"p"}])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p": 1, "q": 1}, []])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p": 1, "q": 1}, {}])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p": 1, "q": 1}, {"p": 2}])
 
 		self.assertEqual(wrapper(Mock(), [{"p": 1, "q": 1}]), 911)
 		self.assertEqual(wrapper(Mock(), [{"p": 1, "q": 1}, {"p": 2, "q": 2}]), 911)
