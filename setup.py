@@ -32,6 +32,9 @@ setup(
         "requests >= 1.2.3",
     ],
     test_suite='nose.collector',
-    tests_require=['nose', 'mock'],
-
+    tests_require=[
+        'mock >= 1.0.1',
+        'nose >= 1.3.0',
+        'requests >= 1.2.3'
+    ]
 )

@@ -1,5 +1,9 @@
 import unittest
-from ubidots.apiclient import ServerBridge, try_again, Error400, Error500, raise_informative_exception
+from ubidots.apiclient import ServerBridge
+from ubidots.apiclient import try_again
+from ubidots.apiclient import raise_informative_exception
+from ubidots.apiclient import validate_input
+from ubidots.apiclient import UbidotsError400, UbidotsError500, UbidotsInvalidInputError
 from mock import patch, MagicMock, Mock
 import json
 
@@ -87,8 +91,36 @@ class TestDecorators(unittest.TestCase):
 		fn = Mock(side_effect = [response(error_codes[0]), response(error_codes[1])])
 		real_decorator = raise_informative_exception(error_codes)
 		wrapper = real_decorator(fn)
-		self.assertRaises(Error400, wrapper, Mock() )
-		self.assertRaises(Error500, wrapper, Mock() )
+		self.assertRaises(UbidotsError400, wrapper, Mock() )
+		self.assertRaises(UbidotsError500, wrapper, Mock() )
+
+	def test_raise_validate_input_decorator_dict(self):
+		fn = lambda *args, **kwargs: 911
+		real_decorator = validate_input(dict, ["a", "b", "c"])
+		wrapper = real_decorator(fn)
+
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), {})
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), {"a": 1})
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), {"a": 1, "b": 1})
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), {"a": 1, "b": 1, "d": 1})
+
+		self.assertEqual(wrapper(Mock(), {"a": 1, "b": 1, "c": 1}), 911)
+
+	def test_raise_validate_input_decorator_list(self):
+		fn = lambda *args, **kwargs: 911
+		real_decorator = validate_input(list, ["p", "q"])
+		wrapper = real_decorator(fn)
+
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), dict)
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{}])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p"}])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p": 1, "q": 1}, []])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p": 1, "q": 1}, {}])
+		self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{"p": 1, "q": 1}, {"p": 2}])
+
+		self.assertEqual(wrapper(Mock(), [{"p": 1, "q": 1}]), 911)
+		self.assertEqual(wrapper(Mock(), [{"p": 1, "q": 1}, {"p": 2, "q": 2}]), 911)
 
 if __name__ == '__main__':
 	unittest.main()

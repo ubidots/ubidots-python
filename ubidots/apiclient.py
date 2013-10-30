@@ -4,25 +4,30 @@ import json
 BASE_URL = 'http://app.ubidots.com/api/'
 
 
-class Error500(Exception):
-    pass
+class UbidotsError(Exception):
+    """Generic Ubidots error"""
 
 
-class Error400(Exception):
-    pass
-
-class NoErrorClassAssigned(Exception):
-    pass
+class UbidotsError400(UbidotsError):
+    """Exception thrown when server returns status code 400"""
 
 
-def create_exception_object(code):
+class UbidotsError500(UbidotsError):
+    """Exception thrown when server returns status code 500"""
+
+
+class UbidotsInvalidInputError(UbidotsError):
+    """Exception thrown when client-side verification fails"""
+
+
+def create_exception_object(code, body):
+    """Creates an Exception object for an erronous status code."""
     if code == 500:
-        return Error500("An Internal Server Error Ocurred")
+        return UbidotsError500("An Internal Server Error Occurred.")
     elif code == 400:
-        return Error400("Your request is Invalid, details:")
+        return UbidotsError400("Your request is invalid:\n  " + body)
     else:
-        return NoErrorClassAssigned("there is an non classified error")
-
+        return UbidotsError(body)
 
 
 def raise_informative_exception(list_of_error_codes):
@@ -30,12 +35,18 @@ def raise_informative_exception(list_of_error_codes):
         def wrapped_f(self, *args, **kwargs):
             response = fn(self, *args, **kwargs)
             if response.status_code in list_of_error_codes:
-                error = create_exception_object(response.status_code)
+                try:
+                    body = response.text
+                except:
+                    body = "No body found"
+
+                error = create_exception_object(response.status_code, body)
                 raise error
             else:
                 return response
         return wrapped_f
     return real_decorator
+
 
 def try_again(list_of_error_codes, number_of_tries=2):
     def real_decorator(fn):
@@ -47,6 +58,33 @@ def try_again(list_of_error_codes, number_of_tries=2):
                 else:
                     self.initialize()
             return response
+        return wrapped_f
+    return real_decorator
+
+
+def validate_input(type, required_keys=[]):
+    '''
+    Decorator for validating input on the client side.
+
+    If validation fails, UbidotsInvalidInputError is raised and the function
+    is not called.
+    '''
+    def real_decorator(fn):
+        def wrapped_f(self, *args, **kwargs):
+            if not isinstance(args[0], type):
+                raise UbidotsInvalidInputError("Invalid argument type. Required: " + str(type))
+
+            def check_keys(obj):
+                for key in required_keys:
+                    if key not in obj:
+                        raise UbidotsInvalidInputError('Key "%s" is missing' % key)
+
+            if isinstance(args[0], list):
+                map(check_keys, args[0])
+            elif isinstance(args[0], dict):
+                check_keys(args[0])
+
+            return fn(self, *args, **kwargs)
         return wrapped_f
     return real_decorator
 
@@ -146,6 +184,7 @@ class Datasource(ApiObject):
         variables = self.api._transform_to_variable_objects(response.json())
         return variables
 
+    @validate_input(dict, ["name", "unit", "icon"])
     def create_variable(self, data):
         response = self.bridge.post('datasources/'+self.id+'/variables', data)
         return Variable(response.json(), self.api, datasource= self)
@@ -163,14 +202,18 @@ class Variable(ApiObject):
     def get_values(self):
         return self.bridge.get('variables/'+self.id+'/values').json()
 
+    @validate_input(dict, ["value"])
     def save_value(self, data):
-        dummy = data['value']
+        if not isinstance(data.get('timestamp', 0), int):
+            raise UbidotsInvalidInputError('Key "timestamp" must point to an int value.')
+
         return self.bridge.post('variables/'+ self.id +'/values', data).json()
 
+    @validate_input(list, ["value", "timestamp"])
     def save_values(self, data, force=False):
-        for element in data:
-            dummy = element['value']
-            dummy = element['timestamp']
+        if not all(isinstance(e['timestamp'], int) for e in data):
+            raise UbidotsInvalidInputError('Key "timestamp" must point to an int value.')
+
         path = 'variables/'+ self.id +'/values'
         path += ('', '?force=true')[int(force)]
         return self.bridge.post(path, data).json()
@@ -199,7 +242,7 @@ class ApiClient(object):
 
     def get_datasource(self, id=None, url=None):
         if not id and not url:
-            raise ValueError("id or url required")
+            raise UbidotsInvalidInputError("id or url required")
 
         if id:
             raw_datasource = self.bridge.get('datasources/'+ str(id) ).json()
@@ -208,6 +251,7 @@ class ApiClient(object):
 
         return Datasource(raw_datasource, self)
 
+    @validate_input(dict, ["name"])
     def create_datasource(self, data):
         raw_datasource = self.bridge.post('datasources/', data).json()
         return Datasource(raw_datasource, self)
@@ -220,10 +264,8 @@ class ApiClient(object):
         raw_variable = self.bridge.get('variables/'+ str(id) ).json()
         return Variable(raw_variable, self)
 
+    @validate_input(list, ["variable", "value"])
     def save_collection(self, data, force=False):
-        for element in data:
-            dummy = element['variable']
-            dummy = element['value']
         path = "collections/values"
         path += ('', '?force=true')[int(force)]
         return self.bridge.post(path, data).json()
@@ -233,7 +275,6 @@ class ApiClient(object):
         for ds in raw_datasources:
             datasources.append(Datasource(ds, self))
         return datasources
-
 
     def _transform_to_variable_objects(self, raw_variables):
         variables = []
