@@ -7,3 +7,4 @@ ubidots-python repository.
 
 * Javier Buitrago <javier.buitrago@ubidots.com>
 * Gustavo Angulo <woakas@ubidots.com> 
+* Daniel da Silva <daniel@ubidots.com>
