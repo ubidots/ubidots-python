@@ -258,7 +258,7 @@ class ApiClient(object):
 
     def get_variables(self):
         raw_variables = self.bridge.get('variables').json()
-        return self.transform_to_variables_objects(raw_variables)
+        return self._transform_to_variable_objects(raw_variables)
 
     def get_variable(self, id):
         raw_variable = self.bridge.get('variables/'+ str(id) ).json()
