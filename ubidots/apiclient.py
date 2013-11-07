@@ -94,20 +94,31 @@ class ServerBridge(object):
     Responsabilites: Make petitions to the browser with the right headers and arguments
     '''
 
-    def __init__(self, apikey):
+    def __init__(self, apikey=None, token=None):
         self.base_url = BASE_URL
-        self._token = None
-        self._apikey = apikey
-        self._apikey_header = {'X-UBIDOTS-APIKEY': self._apikey}
-        self.initialize()
+        if apikey:
+            self._token = None
+            self._apikey = apikey
+            self._apikey_header = {'X-UBIDOTS-APIKEY': self._apikey}
+            self.initialize()
+        elif token:
+            self._apikey = None
+            self._token = token
+            self._set_token_header(self._token)
 
 
     def _get_token(self):
         self._token = self._post_with_apikey('auth/token').json()['token']
+        self._set_token_header(self._token)
+
+    def _set_token_header(self, token):
         self._token_header = {'X-AUTH-TOKEN': self._token}
 
+
     def initialize(self):
-        self._get_token()
+        if self._apikey:
+            self._get_token()
+
 
     @raise_informative_exception([400, 500, 401, 403])
     def _post_with_apikey(self, path):

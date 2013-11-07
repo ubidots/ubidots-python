@@ -14,7 +14,7 @@ class TestServerBridge(unittest.TestCase):
 		self.original_initialize = ServerBridge.initialize
 		ServerBridge.initialize = MagicMock()
 		apikey = "anyapikey"
-		self.serverbridge = ServerBridge(apikey)
+		self.serverbridge = ServerBridge(apikey=apikey)
 		self.serverbridge._token_header = {'X-AUTH-TOKEN': 'the token'}
 
 
@@ -22,19 +22,22 @@ class TestServerBridge(unittest.TestCase):
 		ServerBridge.initialize = self.original_initialize
 
 
-	def test_when_server_bridge_is_created_it_initializes(self):
-		self.serverbridge.initialize.assert_called_once_with()
 
-
-	def test_when_initializes_it_get_ask_for_a_token(self):
+	def test_when_ServerBridge_initializes_with_key_it_asks_for_a_token(self):
 		with patch('ubidots.apiclient.requests') as mock_request:
 			ServerBridge.initialize = self.original_initialize
 			apikey = "anyapikey"
-			sb = ServerBridge(apikey)
+			sb = ServerBridge(apikey=apikey)
 			mock_request.post.assert_called_once_with(
 				"%s%s"%(sb.base_url, "auth/token"),
 				headers = {'content-type': 'application/json', 'X-UBIDOTS-APIKEY': 'anyapikey'}
 			)
+
+	def test_when_ServerBridge_initializes_with_token_it_set_it_correctly(self):
+			sb = ServerBridge(token="anytoken")
+			self.assertEqual(sb._token_header, {'X-AUTH-TOKEN': 'anytoken'})
+
+
 
 	def test_get_includes_specific_headers(self):
 
