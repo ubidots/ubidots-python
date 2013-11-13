@@ -1,5 +1,6 @@
 import requests
 import json
+import re
 
 BASE_URL = 'http://app.ubidots.com/api/'
 
@@ -44,6 +45,8 @@ def raise_informative_exception(list_of_error_codes):
                 raise error
             else:
                 return response
+            pag = Paginator(self.fakeapi, response, self.fake_transform_function)
+
         return wrapped_f
     return real_decorator
 
@@ -94,8 +97,8 @@ class ServerBridge(object):
     Responsabilites: Make petitions to the browser with the right headers and arguments
     '''
 
-    def __init__(self, apikey=None, token=None):
-        self.base_url = BASE_URL
+    def __init__(self, apikey=None, token=None, base_url = None):
+        self.base_url = base_url or BASE_URL
         if apikey:
             self._token = None
             self._apikey = apikey
@@ -242,10 +245,106 @@ class Variable(ApiObject):
         return self.name
 
 
+class Paginator(object):
+    def __init__(self, bridge, response, transform_function, endpoint):
+        self.bridge = bridge
+        self.response = response
+        self.endpoint = endpoint
+        self.count = self.response['count']
+        self.transform_function = transform_function
+        self.items_per_page = self._get_number_of_items_per_page()
+        self.number_of_pages = self._get_number_of_pages()
+        self.pages = range(1, self.number_of_pages + 1)
+        self.items = {}
+        self.add_new_items(1, response)
+
+    def _there_is_more_than_one_page(self):
+        return len(self.response['result']) < self.count
+
+    def _get_number_of_items_per_page(self):
+        if self._there_is_more_than_one_page():
+            return len(self.response['result'])
+        else:
+            return None
+
+    def _get_number_of_pages(self):
+        if self.items_per_page:
+            number_of_pages = int(self.count/self.items_per_page)
+            if self.count%self.items_per_page !=  0:
+                number_of_pages +=1
+        else:
+            number_of_pages = 1
+        return number_of_pages
+
+
+    def add_new_items(self,page, response):
+        # page_number = self._get_page_number(response)
+        new_items = self.transform_function(response['result'])
+        self.items[page] = new_items
+
+
+    def _get_page_from_url(self, url):
+        re_page = re.compile("page\s*=\s*(\d+)")
+        try:
+            return int(re_page.findall(url)[0])
+        except:
+            raise Exception("Something got wrong with the url pagination %s"%url)
+
+    def _get_page_number(self, response):
+        prev = response['previous']
+        next = response['next']
+        if not prev:
+            return 1
+        else:
+            return self._get_page_from_url(prev) + 1
+
+    def get_page(self, page, force_update=False):
+        if page not in self.pages:
+            raise Exception("Page Out of Range")
+        if page in self.items and force_update == False:
+            return self.items[page]
+        else:
+            response =  self.bridge.get("%s?page=%s"%(self.endpoint, page,)).json()
+            self.add_new_items(page, response)
+            return self.items[page]
+
+    def get_last_items(self, number_of_items):
+        if number_of_items == 0: return []
+        pages = self._calculate_pages_needed(number_of_items)
+        self.get_pages(pages)
+        return self._flat_items(pages)[:min(number_of_items, self.count)]
+
+    def get_all_items(self):
+        return self.get_last_items(self.count)
+
+    def _calculate_pages_needed(self, number_of_items):
+        num_pages = int(number_of_items/self.items_per_page)
+        res = number_of_items%self.items_per_page
+        one_more_page = 1        
+        if res:
+            return self._filter_valid_pages(range(1,num_pages + 1 + one_more_page))
+        else: 
+            return self._filter_valid_pages(range(1, num_pages +1))
+
+    def get_pages(self, pages):
+        for page in pages:
+            self.get_page(page)
+
+    def _flat_items(self, pages):
+        nestedlist = [value for key, value in self.items.items() if key in pages]
+        return [ item for sublist in nestedlist for item in sublist ]
+
+    def _filter_valid_pages(self, list_of_pages):
+        return list(set(list_of_pages) & set(self.pages))
+
+
+    def _add_items_to_results(self, raw_results):
+        self.result[self.current_page] = raw_result
+
 
 class ApiClient(object):
-    def __init__(self, apikey):
-        self.bridge = ServerBridge(apikey)
+    def __init__(self, apikey = None, token=None, base_url = None):
+        self.bridge = ServerBridge(apikey, token, base_url)
 
     def get_datasources(self):
         raw_datasources = self.bridge.get('datasources').json()

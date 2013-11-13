@@ -4,6 +4,7 @@ from ubidots.apiclient import try_again
 from ubidots.apiclient import raise_informative_exception
 from ubidots.apiclient import validate_input
 from ubidots.apiclient import UbidotsError400, UbidotsError500, UbidotsInvalidInputError
+from ubidots.apiclient import Paginator
 from mock import patch, MagicMock, Mock
 import json
 
@@ -14,7 +15,7 @@ class TestServerBridge(unittest.TestCase):
 		self.original_initialize = ServerBridge.initialize
 		ServerBridge.initialize = MagicMock()
 		apikey = "anyapikey"
-		self.serverbridge = ServerBridge(apikey=apikey)
+		self.serverbridge = ServerBridge(apikey)
 		self.serverbridge._token_header = {'X-AUTH-TOKEN': 'the token'}
 
 
@@ -27,7 +28,7 @@ class TestServerBridge(unittest.TestCase):
 		with patch('ubidots.apiclient.requests') as mock_request:
 			ServerBridge.initialize = self.original_initialize
 			apikey = "anyapikey"
-			sb = ServerBridge(apikey=apikey)
+			sb = ServerBridge(apikey)
 			mock_request.post.assert_called_once_with(
 				"%s%s"%(sb.base_url, "auth/token"),
 				headers = {'content-type': 'application/json', 'X-UBIDOTS-APIKEY': 'anyapikey'}
@@ -127,3 +128,82 @@ class TestDecorators(unittest.TestCase):
 
 if __name__ == '__main__':
 	unittest.main()
+
+
+class TestPaginator(unittest.TestCase):
+
+	def setUp(self):
+		class fakebridge(object):
+			pass
+
+		def fake_transform_function(items):
+			return [index for index,item in enumerate(items)]
+
+		self.fakebridge = fakebridge;
+		self.fake_transform_function = fake_transform_function;
+		self.response = '{"count": 12, "next": null, "previous": "the/end/point/?page = 2", "result": [{"a":1},{"a":2},{"a":3},{"a":4},{"a":5}]}'
+		self.response = json.loads(self.response)
+		self.endpoint = "/the/end/point/"
+
+	def test_paginator_calculates_number_of_items_per_page_and_number_of_pages(self):
+		response = self.response
+		pag = Paginator(self.fakebridge, response, self.fake_transform_function, self.endpoint)
+
+		self.assertEqual(pag.items_per_page, 5)
+		self.assertEqual(pag.number_of_pages, 3)
+
+
+	def test_paginator_can_ask_for_a_specific_page(self):
+		PAGE = 2
+		response = self.response
+		response_mock = Mock()
+		response_mock.json = Mock(return_value = self.response)
+		mock_bridge = Mock()
+		mock_bridge.get = Mock(return_value = response_mock )
+		pag = Paginator(mock_bridge, response, self.fake_transform_function, self.endpoint)
+		response = pag.get_page(PAGE)
+
+		mock_bridge.get.assert_called_once_with("%s?page=%s"%(self.endpoint, PAGE),)
+		self.assertEqual(response, [0,1,2,3,4])
+
+	def test_paginator_returns_exception_if_page_don_not_exist(self):
+		pag = Paginator(self.fakebridge, self.response, self.fake_transform_function, self.endpoint)
+		self.assertRaises(Exception, pag.get_page, (1000))
+
+	def test_paginator_can_ask_for_the_last_x_values(self):
+		pag = Paginator(self.fakebridge, self.response, self.fake_transform_function, self.endpoint)
+		pag.get_pages = Mock()
+		pag.items = {1:[{"a":1},{"a":2},{"a":3},{"a":4},{"a":5}], 2:[{"a":6},{"a":7},{"a":8},{"a":9},{"a":10}], 3:[{"a":11},{"a":12}]}
+		values = pag.get_last_items(7)
+		self.assertEqual(values,[{"a":1},{"a":2},{"a":3},{"a":4},{"a":5}, {"a":6}, {"a":7}] )
+
+	def test_paginator_can_ask_for_all_the_items(self):
+		pag = Paginator(self.fakebridge, self.response, self.fake_transform_function, self.endpoint)
+		pag.get_pages = Mock()
+		pag.items = {1:[{"a":1},{"a":2},{"a":3},{"a":4},{"a":5}], 2:[{"a":6},{"a":7},{"a":8},{"a":9},{"a":10}], 3:[{"a":11},{"a":12}]}
+		values = pag.get_all_items()
+		self.assertEqual(values,[{"a":1},{"a":2},{"a":3},{"a":4},{"a":5}, {"a":6}, {"a":7},{"a":8},{"a":9},{"a":10},{"a":11},{"a":12}] )
+
+
+
+
+	def test_paginator_can_ask_for_the_range_of_pages(self):
+		response = self.response
+		pag = Paginator(self.fakebridge, response, self.fake_transform_function, self.endpoint)
+		self.assertEqual(pag.pages, [1,2,3])
+
+
+	def test_paginator_make_the_custom_transformation(self):
+
+		class fakebridge(object):
+			pass
+
+		def transformation_function(items):
+			for item in items:
+				item['a'] = item['a'] + 1
+			return items
+
+
+		any_dict = '{"count": 4, "next": null, "previous": null, "result": [{"a":1},{"a":2},{"a":3},{"a":4}]}'
+		any_dict = json.loads(any_dict)
+		pag = Paginator(fakebridge,any_dict,transformation_function, self.endpoint)
