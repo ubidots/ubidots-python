@@ -14,7 +14,7 @@ Ubidots for python is available in Pypi and you can install it from the command 
 
 .. code-block:: bash
 
-    $ pip install ubidots
+    $ pip install ubidots==0.1.3-alpha
 
 Don't forget to use sudo if necessary.
 
@@ -22,9 +22,9 @@ You can install pip in Linux and Mac using this command:
 
 .. code-block:: bash
 
-    $ easy_install pip
+    $ sudo easy_install pip
 
-If you don't have *easy_install*, try the following:
+If you don't have *easy_install*, you can get it through *apt-get*:
 
 .. code-block:: bash
     
