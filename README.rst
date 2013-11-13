@@ -24,7 +24,15 @@ You can install pip in Linux and Mac using this command:
 
     $ easy_install pip
 
+If you don't have *easy_install*, try the following:
+
+.. code-block:: bash
+    
+    $ sudo apt-get install python-setuptools
+
 If you are using Microsoft Windows you can install pip from `here <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pip>`_.
+
+
 
 Running Tests
 -----------------------------
