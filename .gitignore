@@ -16,3 +16,5 @@ bin/
 include/
 lib/
 /docs/
+config.py
+config_production.py

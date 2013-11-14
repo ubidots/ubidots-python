@@ -41,7 +41,6 @@ class TestServerBridge(unittest.TestCase):
 
 
 	def test_get_includes_specific_headers(self):
-
 		with patch('ubidots.apiclient.requests') as mock_request:
 			self.serverbridge.get("any/path")
 
@@ -51,7 +50,6 @@ class TestServerBridge(unittest.TestCase):
 			)
 
 	def test_post_includes_specific_headers_and_data(self):
-
 		with patch('ubidots.apiclient.requests') as mock_request:
 			data = {"dataone":1, "datatwo":2}
 			self.serverbridge.post("any/path", data)
@@ -63,7 +61,6 @@ class TestServerBridge(unittest.TestCase):
 			)
 
 	def test_delete_includes_specific_headers(self):
-
 		with patch('ubidots.apiclient.requests') as mock_request:
 			self.serverbridge.delete("any/path")
 
@@ -75,9 +72,10 @@ class TestServerBridge(unittest.TestCase):
 
 class TestDecorators(unittest.TestCase):
 
-	def test_try_again_decorator_number_of_tries_or_fails(self):
+	def test_try_again_decorator_number_of_tries_or_fail(self):
 		from collections import namedtuple
-		error_codes = [401, 403]
+		from ubidots.apiclient import UbidotsForbiddenError
+		error_codes = [401]
 
 		response = namedtuple('response', 'status_code')
 		fn = Mock(side_effect = [response(error_codes[0]) for i in range(10)])
@@ -85,8 +83,7 @@ class TestDecorators(unittest.TestCase):
 		
 		serverbridge_mock = Mock()
 		wrapper = real_decorator(fn)
-		wrapper(serverbridge_mock)
-		serverbridge_mock.initialize.assert_called_with()
+		self.assertRaises(UbidotsForbiddenError, wrapper, serverbridge_mock )
 
 	def test_raise_informative_exception_decorator(self):
 		from collections import namedtuple
@@ -141,7 +138,7 @@ class TestPaginator(unittest.TestCase):
 
 		self.fakebridge = fakebridge;
 		self.fake_transform_function = fake_transform_function;
-		self.response = '{"count": 12, "next": null, "previous": "the/end/point/?page = 2", "result": [{"a":1},{"a":2},{"a":3},{"a":4},{"a":5}]}'
+		self.response = '{"count": 12, "next": null, "previous": "the/end/point/?page = 2", "results": [{"a":1},{"a":2},{"a":3},{"a":4},{"a":5}]}'
 		self.response = json.loads(self.response)
 		self.endpoint = "/the/end/point/"
 
@@ -185,8 +182,6 @@ class TestPaginator(unittest.TestCase):
 		self.assertEqual(values,[{"a":1},{"a":2},{"a":3},{"a":4},{"a":5}, {"a":6}, {"a":7},{"a":8},{"a":9},{"a":10},{"a":11},{"a":12}] )
 
 
-
-
 	def test_paginator_can_ask_for_the_range_of_pages(self):
 		response = self.response
 		pag = Paginator(self.fakebridge, response, self.fake_transform_function, self.endpoint)
@@ -204,6 +199,6 @@ class TestPaginator(unittest.TestCase):
 			return items
 
 
-		any_dict = '{"count": 4, "next": null, "previous": null, "result": [{"a":1},{"a":2},{"a":3},{"a":4}]}'
+		any_dict = '{"count": 4, "next": null, "previous": null, "results": [{"a":1},{"a":2},{"a":3},{"a":4}]}'
 		any_dict = json.loads(any_dict)
 		pag = Paginator(fakebridge,any_dict,transformation_function, self.endpoint)

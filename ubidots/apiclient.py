@@ -2,33 +2,47 @@ import requests
 import json
 import re
 
-BASE_URL = 'http://app.ubidots.com/api/'
+BASE_URL = 'http://app.ubidots.com/api/v1.6/'
+
 
 
 class UbidotsError(Exception):
     """Generic Ubidots error"""
-
+    pass
 
 class UbidotsError400(UbidotsError):
-    """Exception thrown when server returns status code 400"""
+    """Exception thrown when server returns status code 400 Bad request"""
+    pass
 
+class UbidotsError404(UbidotsError):
+    """Exception thrown when server returns status code 404 Not found"""
+    pass
 
 class UbidotsError500(UbidotsError):
     """Exception thrown when server returns status code 500"""
+    pass
 
+class UbidotsForbiddenError(UbidotsError):
+    """Exception thrown when server returns status code 401 or 403"""
+    pass
 
 class UbidotsInvalidInputError(UbidotsError):
     """Exception thrown when client-side verification fails"""
-
+    pass
 
 def create_exception_object(code, body):
     """Creates an Exception object for an erronous status code."""
+
     if code == 500:
         return UbidotsError500("An Internal Server Error Occurred.")
     elif code == 400:
         return UbidotsError400("Your request is invalid:\n  " + body)
+    elif code == 404:
+        return UbidotsError404("Resource requested not found:\n  " + body)
+    elif code in [403, 401]:
+        return UbidotsForbiddenError("Your token is invalid or you don't have permissions to access this resource:\n " + body)
     else:
-        return UbidotsError(body)
+        return UbidotsError("Not Handled Exception: " + body)
 
 
 def raise_informative_exception(list_of_error_codes):
@@ -39,14 +53,12 @@ def raise_informative_exception(list_of_error_codes):
                 try:
                     body = response.text
                 except:
-                    body = "No body found"
+                    body = ""
 
                 error = create_exception_object(response.status_code, body)
                 raise error
             else:
                 return response
-            pag = Paginator(self.fakeapi, response, self.fake_transform_function)
-
         return wrapped_f
     return real_decorator
 
@@ -60,7 +72,15 @@ def try_again(list_of_error_codes, number_of_tries=2):
                     return response
                 else:
                     self.initialize()
-            return response
+
+            try:
+                body = response.text
+            except:
+                body = ""
+
+            error = create_exception_object(response.status_code,body )
+            raise error
+
         return wrapped_f
     return real_decorator
 
@@ -107,14 +127,14 @@ class ServerBridge(object):
         elif token:
             self._apikey = None
             self._token = token
-            self._set_token_header(self._token)
+            self._set_token_header()
 
 
     def _get_token(self):
         self._token = self._post_with_apikey('auth/token').json()['token']
-        self._set_token_header(self._token)
+        self._set_token_header()
 
-    def _set_token_header(self, token):
+    def _set_token_header(self):
         self._token_header = {'X-AUTH-TOKEN': self._token}
 
 
@@ -123,14 +143,14 @@ class ServerBridge(object):
             self._get_token()
 
 
-    @raise_informative_exception([400, 500, 401, 403])
+    @raise_informative_exception([400, 404, 500, 401, 403])
     def _post_with_apikey(self, path):
         headers = self._prepare_headers(self._apikey_header)
         response = requests.post(self.base_url + path, headers =  headers)
         return response
 
     @try_again([403, 401])
-    @raise_informative_exception([400, 500])
+    @raise_informative_exception([400, 404, 500])
     def get(self, path):
         headers = self._prepare_headers(self._token_header)
         response = requests.get(self.base_url + path, headers = headers)
@@ -142,7 +162,7 @@ class ServerBridge(object):
         return response
 
     @try_again([403, 401])
-    @raise_informative_exception([400, 500])
+    @raise_informative_exception([400, 404, 500])
     def post(self, path, data):
         headers = self._prepare_headers(self._token_header)
         data = self._prepare_data(data)
@@ -150,7 +170,7 @@ class ServerBridge(object):
         return response
 
     @try_again([403, 401])
-    @raise_informative_exception([400, 500])
+    @raise_informative_exception([400, 404, 500])
     def delete(self, path):
         headers = self._prepare_headers(self._token_header)
         response = requests.delete(self.base_url + path, headers = headers)
@@ -190,13 +210,19 @@ class ApiObject(object):
 class Datasource(ApiObject):
 
     def remove_datasource(self):
-        response = self.bridge.delete('datasources/'+ self.id).json()
+        response = self.bridge.delete('datasources/'+ self.id)
         return response
 
     def get_variables(self):
-        response = self.bridge.get('datasources/'+self.id+'/variables')
-        variables = self.api._transform_to_variable_objects(response.json())
-        return variables
+        endpoint = 'datasources/'+self.id+'/variables'
+        response = self.bridge.get(endpoint)
+        if response.status_code == 200:
+            return Paginator(self.bridge, response.json(), self.api._transform_to_variable_objects, endpoint)
+
+    def get_variable(self, var_id):
+        endpoint = 'variables/' + var_id
+        raw_variable = self.bridge.get(endpoint).json()
+        return Variable(raw_variable, self.api)
 
     @validate_input(dict, ["name", "unit", "icon"])
     def create_variable(self, data):
@@ -214,7 +240,13 @@ class Variable(ApiObject):
         self.datasource = self._get_datasource(**kwargs)    
 
     def get_values(self):
-        return self.bridge.get('variables/'+self.id+'/values').json()
+        endpoint = 'variables/'+self.id+'/values'
+        response = self.bridge.get(endpoint).json()
+        return Paginator(self.bridge, response, self.dummy_transform_function, endpoint)
+
+    def dummy_transform_function(self, values):
+        return values
+
 
     @validate_input(dict, ["value"])
     def save_value(self, data):
@@ -233,7 +265,8 @@ class Variable(ApiObject):
         return self.bridge.post(path, data).json()
 
     def remove_variable(self):
-        return self.bridge.delete('variables/'+self.id).json()
+        return self.bridge.delete('variables/'+self.id)
+
 
     def _get_datasource(self, **kwargs):
         datasource = kwargs.get('datasource',None)
@@ -259,27 +292,22 @@ class Paginator(object):
         self.add_new_items(1, response)
 
     def _there_is_more_than_one_page(self):
-        return len(self.response['result']) < self.count
+        return len(self.response['results']) < self.count
 
     def _get_number_of_items_per_page(self):
-        if self._there_is_more_than_one_page():
-            return len(self.response['result'])
-        else:
-            return None
+        return len(self.response['results'])
 
     def _get_number_of_pages(self):
-        if self.items_per_page:
-            number_of_pages = int(self.count/self.items_per_page)
-            if self.count%self.items_per_page !=  0:
-                number_of_pages +=1
-        else:
-            number_of_pages = 1
+        if self.items_per_page == 0: return 0
+        number_of_pages = int(self.count/self.items_per_page)
+        if self.count%self.items_per_page !=  0:
+            number_of_pages +=1
         return number_of_pages
 
 
     def add_new_items(self,page, response):
         # page_number = self._get_page_number(response)
-        new_items = self.transform_function(response['result'])
+        new_items = self.transform_function(response['results'])
         self.items[page] = new_items
 
 
@@ -318,6 +346,7 @@ class Paginator(object):
         return self.get_last_items(self.count)
 
     def _calculate_pages_needed(self, number_of_items):
+        if self.count == 0: return []
         num_pages = int(number_of_items/self.items_per_page)
         res = number_of_items%self.items_per_page
         one_more_page = 1        
@@ -347,15 +376,16 @@ class ApiClient(object):
         self.bridge = ServerBridge(apikey, token, base_url)
 
     def get_datasources(self):
-        raw_datasources = self.bridge.get('datasources').json()
-        return self._transform_to_datasource_objects(raw_datasources)
+        endpoint = 'datasources'
+        response = self.bridge.get(endpoint).json()
+        return Paginator(self.bridge, response, self._transform_to_datasource_objects, endpoint)
 
-    def get_datasource(self, id=None, url=None):
+    def get_datasource(self, ds_id=None, url=None):
         if not id and not url:
             raise UbidotsInvalidInputError("id or url required")
 
-        if id:
-            raw_datasource = self.bridge.get('datasources/'+ str(id) ).json()
+        if ds_id:
+            raw_datasource = self.bridge.get('datasources/'+ str(ds_id) ).json()
         elif url:
             raw_datasource = self.bridge.get_with_url(url).json()
 
@@ -367,11 +397,12 @@ class ApiClient(object):
         return Datasource(raw_datasource, self)
 
     def get_variables(self):
-        raw_variables = self.bridge.get('variables').json()
-        return self._transform_to_variable_objects(raw_variables)
+        endpoint = 'variables'
+        response = self.bridge.get('variables').json()
+        return Paginator(self.bridge, response, self._transform_to_variable_objects, endpoint)
 
-    def get_variable(self, id):
-        raw_variable = self.bridge.get('variables/'+ str(id) ).json()
+    def get_variable(self, var_id):
+        raw_variable = self.bridge.get('variables/'+ str(var_id) ).json()
         return Variable(raw_variable, self)
 
     @validate_input(list, ["variable", "value"])
