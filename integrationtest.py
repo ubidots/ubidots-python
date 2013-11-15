@@ -134,6 +134,19 @@ class TestDataSourcesEndPointErrors(unittest.TestCase):
         api.bridge._token = token
         api.bridge._set_token_header()
 
+    @contextmanager
+    def set_other_user_enviroment(self, apikey2):
+        api2 = ApiClient(apikey2, base_url = base_url)
+        ds2 = api2.create_datasource({"name":"otherUserDs"})
+        var2 = ds2.create_variable({"name":"othervar", "unit":"x", "icon":"cloud"})
+
+        yield {"datasource":ds2, "variables":[var2]}
+
+        datasources = api2.get_datasources().get_all_items()
+        [ds.remove_datasource() for ds in datasources]
+
+
+
     def test_403_errors(self):
         ds = self.api.create_datasource({"name":"testds"})       
         with self.set_bad_token(self.api) as api:
@@ -152,25 +165,27 @@ class TestDataSourcesEndPointErrors(unittest.TestCase):
     ## Section detail datasource ##
 
     def test_a_user_cannot_retrieve_a_datasourse_of_other_user(self):
-        api2 = ApiClient(apikey2, base_url = base_url)
-        ds2 = api2.create_datasource({"name":"otherUserDs"})
-
-        self.assertRaises(Exception, self.api.get_datasource, ds2.id)
-
-        datasources = api2.get_datasources().get_all_items()
-        [ds.remove_datasource() for ds in datasources]
+        with self.set_other_user_enviroment(apikey2) as otheruseritems:
+            self.assertRaises(UbidotsForbiddenError, self.api.get_datasource, otheruseritems['datasource'].id)
 
     def test_a_mailformed_id_generates_a_400_error(self):
-        self.assertRaises(Exception, self.api.get_datasource, "mailformedid")
+        self.assertRaises(UbidotsError400, self.api.get_datasource, "mailformedid")
 
     def test_api_raise_404_exception_if_datasource_does_not_exists(self):
         self.assertRaises(UbidotsError404, self.api.get_datasource, "000000000000000000000000")
 
 
+    ## Section list variables ##
+    def test_a_user_cannot_retrieve_a_variable_of_other_user(self):
+        with self.set_other_user_enviroment(apikey2) as otheruseritems:
+            self.assertRaises(UbidotsForbiddenError, self.api.get_variable, otheruseritems['variables'][0].id)
+
+
+
+
 
 
 class TestDataSourceEndPointDeleteMethod(unittest.TestCase):
-
 
     def setUp(self):
         self.NUMBER_OF_DATASOURCES = 3
