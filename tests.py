@@ -202,3 +202,7 @@ class TestPaginator(unittest.TestCase):
 		any_dict = '{"count": 4, "next": null, "previous": null, "results": [{"a":1},{"a":2},{"a":3},{"a":4}]}'
 		any_dict = json.loads(any_dict)
 		pag = Paginator(fakebridge,any_dict,transformation_function, self.endpoint)
+
+
+class TestApiClient(unittest.TestCase):
+	pass	

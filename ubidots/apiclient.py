@@ -4,25 +4,46 @@ import re
 
 BASE_URL = 'http://app.ubidots.com/api/v1.6/'
 
+#test_a_user_cannot_retrieve_a_datasourse_of_other_user
+#test_a_user_cannot_retrieve_a_variable_of_other_user
+
+def get_response_json_or_info_message(response):
+    if response.status_code == 204:
+        resp = {"detail":"this response don't need a body", 'is_json': False}
+
+    try:
+        resp = response.json()
+        resp['is_json'] = True
+    except Exception, e:
+        resp ={"detail": "this response doesn't have a valid json response", 'is_json': False}
+    return resp
 
 
 class UbidotsError(Exception):
-    """Generic Ubidots error"""
     pass
 
-class UbidotsError400(UbidotsError):
+class UbidotsHTTPError(UbidotsError):
+    def __init__(self, *args, **kwargs):
+        self.response = kwargs['response']
+        self.detail = get_response_json_or_info_message(self.response)
+        self.status_code = self.response.status_code
+        del kwargs['response']
+        super(UbidotsHTTPError, self).__init__(*args, **kwargs)
+
+
+class UbidotsError400(UbidotsHTTPError):
     """Exception thrown when server returns status code 400 Bad request"""
     pass
 
-class UbidotsError404(UbidotsError):
+class UbidotsError404(UbidotsHTTPError):
     """Exception thrown when server returns status code 404 Not found"""
     pass
 
-class UbidotsError500(UbidotsError):
+class UbidotsError500(UbidotsHTTPError):
     """Exception thrown when server returns status code 500"""
     pass
 
-class UbidotsForbiddenError(UbidotsError):
+class UbidotsForbiddenError(UbidotsHTTPError):
     """Exception thrown when server returns status code 401 or 403"""
     pass
 
@@ -30,19 +51,22 @@ class UbidotsInvalidInputError(UbidotsError):
     """Exception thrown when client-side verification fails"""
     pass
 
-def create_exception_object(code, body):
+
+def create_exception_object(response):
     """Creates an Exception object for an erronous status code."""
 
+    code = response.status_code
+
     if code == 500:
-        return UbidotsError500("An Internal Server Error Occurred.")
+        return UbidotsError500("An Internal Server Error Occurred.", response = response)
     elif code == 400:
-        return UbidotsError400("Your request is invalid:\n  " + body)
+        return UbidotsError400("Your response is invalid", response = response)
     elif code == 404:
-        return UbidotsError404("Resource requested not found:\n  " + body)
+        return UbidotsError404("Resource responseed not found:\n  ", response = response)
     elif code in [403, 401]:
-        return UbidotsForbiddenError("Your token is invalid or you don't have permissions to access this resource:\n " + body)
+        return UbidotsForbiddenError("Your token is invalid or you don't have permissions to access this resource:\n ", response = response)
     else:
-        return UbidotsError("Not Handled Exception: " + body)
+        return UbidotsError("Not Handled Exception: ", response = response)
 
 
 def raise_informative_exception(list_of_error_codes):
@@ -55,7 +79,8 @@ def raise_informative_exception(list_of_error_codes):
                 except:
                     body = ""
 
-                error = create_exception_object(response.status_code, body)
+                #error = create_exception_object(response.status_code, body)
+                error = create_exception_object(response)
                 raise error
             else:
                 return response
@@ -78,7 +103,7 @@ def try_again(list_of_error_codes, number_of_tries=2):
             except:
                 body = ""
 
-            error = create_exception_object(response.status_code,body )
+            error = create_exception_object(response)
             raise error
 
         return wrapped_f
@@ -110,6 +135,7 @@ def validate_input(type, required_keys=[]):
             return fn(self, *args, **kwargs)
         return wrapped_f
     return real_decorator
+
 
 
 class ServerBridge(object):
@@ -206,6 +232,20 @@ class ApiObject(object):
     def _from_raw_to_attributes(self):
         for key, value in self.raw.items():
             setattr(self, key, value)
+
+
+def transform_to_datasource_objects(raw_datasources):
+    datasources = []
+    for ds in raw_datasources:
+        datasources.append(Datasource(ds, self))
+    return datasources
+
+def transform_to_variable_objects(raw_variables):
+    variables = []
+    for variable in raw_variables:
+        variables.append(Variable(variable, self))
+    return variables
+
 
 class Datasource(ApiObject):
 
@@ -374,6 +414,10 @@ class Paginator(object):
 class ApiClient(object):
     def __init__(self, apikey = None, token=None, base_url = None):
         self.bridge = ServerBridge(apikey, token, base_url)
+
+    def set_server_bridge(self, server_bridge):
+        self.bridge = server_bridge
+        
 
     def get_datasources(self):
         endpoint = 'datasources'
