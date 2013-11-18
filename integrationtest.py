@@ -51,7 +51,6 @@ class TestDataSourcesEndPointNormalFlow(unittest.TestCase):
         [ds.remove_datasource() for ds in self.api.get_datasources().get_all_items()]
 
 
-
     ## Section list create datasources ##
 
     def test_detail_of_datasource_is_returned_when_created(self):
@@ -93,7 +92,7 @@ class TestDataSourcesEndPointNormalFlow(unittest.TestCase):
 
     ### Section List Create Variables from Datasource ##
 
-    def test_all_variables_has_been_created_and_can_be_retrievend_from_datasources(self):
+    def test_all_variables_has_been_created_and_can_be_retrievend_from_datasources_theirs_respective_datasource(self):
         ds_paginator = self.api.get_datasources()
         datasources = ds_paginator.get_all_items()
         for datasource in datasources:
@@ -105,13 +104,6 @@ class TestDataSourcesEndPointNormalFlow(unittest.TestCase):
         newvar = ds.create_variable({"name":"new_variable", "unit":"X", "icon":"cloud"})
         self.assertTrue(hasattr(newvar,'id'))
 
-    ### Section Detail Variable from Datasource ##
-
-    def test_can_access_a_variable_from_datasource(self):
-        ds = self.ds_list[0]
-        var_id = self.var_list[0].id
-        newvar = ds.get_variable(var_id)
-        self.assertEqual(newvar.id, var_id)
 
 
 class TestDataSourcesEndPointErrors(unittest.TestCase):
@@ -163,7 +155,6 @@ class TestDataSourcesEndPointErrors(unittest.TestCase):
 
 
     ## Section detail datasource ##
-
     def test_a_user_cannot_retrieve_a_datasourse_of_other_user(self):
         with self.set_other_user_enviroment(apikey2) as otheruseritems:
             self.assertRaises(UbidotsForbiddenError, self.api.get_datasource, otheruseritems['datasource'].id)
@@ -179,10 +170,6 @@ class TestDataSourcesEndPointErrors(unittest.TestCase):
     def test_a_user_cannot_retrieve_a_variable_of_other_user(self):
         with self.set_other_user_enviroment(apikey2) as otheruseritems:
             self.assertRaises(UbidotsForbiddenError, self.api.get_variable, otheruseritems['variables'][0].id)
-
-
-
-
 
 
 class TestDataSourceEndPointDeleteMethod(unittest.TestCase):

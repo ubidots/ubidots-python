@@ -21,6 +21,7 @@ def get_response_json_or_info_message(response):
 
 class UbidotsError(Exception):
     pass
+    
 
 class UbidotsHTTPError(UbidotsError):
     def __init__(self, *args, **kwargs):
