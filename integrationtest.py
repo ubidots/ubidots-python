@@ -5,16 +5,14 @@ from mock import patch, MagicMock, Mock
 from contextlib import contextmanager
 
 
-
 class TestCreationOfValues(unittest.TestCase):
 
     def setUp(self):
         self.NUMBER_OF_VALUES = 10
-        # apikey = open('apikey.txt').readlines()[0]
         self.api = ApiClient(apikey, base_url = base_url)
 
         self.datasource = self.api.create_datasource({"name":"dstest01","description":"desc","tags":["dstest01", "01"]})
-        self.variable = self.datasource.create_variable({"name":"vartest01", "unit":"C", "icon":"cloud"})
+        self.variable = self.datasource.create_variable({"name":"vartest01", "unit":"x"})
 
 
         for i in range(self.NUMBER_OF_VALUES):
@@ -44,7 +42,7 @@ class TestDataSourcesEndPointNormalFlow(unittest.TestCase):
             ds = self.api.create_datasource({"name":"dstest%s"%datasource})
             self.ds_list.append(ds)
             for variable in range(self.NUMBER_OF_VARIABLES_PER_DS):
-                var = ds.create_variable({"name":"var%s"%variable, "unit":"c", "icon":"cloud"})
+                var = ds.create_variable({"name":"var%s"%variable, "unit":"x",})
                 self.var_list.append(var)
 
     def tearDown(self):
@@ -101,7 +99,7 @@ class TestDataSourcesEndPointNormalFlow(unittest.TestCase):
 
     def test_detail_of_variable_is_returned_when_created(self):
         ds = self.ds_list[0]
-        newvar = ds.create_variable({"name":"new_variable", "unit":"X", "icon":"cloud"})
+        newvar = ds.create_variable({"name":"new_variable", "unit":"x"})
         self.assertTrue(hasattr(newvar,'id'))
 
 
@@ -130,7 +128,7 @@ class TestDataSourcesEndPointErrors(unittest.TestCase):
     def set_other_user_enviroment(self, apikey2):
         api2 = ApiClient(apikey2, base_url = base_url)
         ds2 = api2.create_datasource({"name":"otherUserDs"})
-        var2 = ds2.create_variable({"name":"othervar", "unit":"x", "icon":"cloud"})
+        var2 = ds2.create_variable({"name":"othervar", "unit":"x"})
 
         yield {"datasource":ds2, "variables":[var2]}
 
@@ -147,7 +145,7 @@ class TestDataSourcesEndPointErrors(unittest.TestCase):
                 {'method': api.create_datasource, 'args': [{"name":"bad_datasource"}] },
                 {'method': api.get_variables },
                 {'method': ds.get_variables},
-                {'method': ds.create_variable, 'args':[{'name':'testvarname', 'unit':'x', 'icon':'cloud'}]},
+                {'method': ds.create_variable, 'args':[{'name':'testvarname', 'unit':'x'}]},
             ]
 
             for request in request_list:
@@ -184,7 +182,7 @@ class TestDataSourceEndPointDeleteMethod(unittest.TestCase):
             ds = self.api.create_datasource({"name":"dstest%s"%datasource})
             self.ds_list.append(ds)
             for variable in range(self.NUMBER_OF_VARIABLES_PER_DS):
-                ds.create_variable({"name":"var%s"%variable, "unit":"c", "icon":"cloud"})
+                ds.create_variable({"name":"var%s"%variable, "unit":"x"})
 
     def tearDown(self):
         [ds.remove_datasource() for ds in self.api.get_datasources().get_all_items()]

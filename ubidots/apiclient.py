@@ -21,7 +21,7 @@ def get_response_json_or_info_message(response):
 
 class UbidotsError(Exception):
     pass
-    
+
 
 class UbidotsHTTPError(UbidotsError):
     def __init__(self, *args, **kwargs):
@@ -265,7 +265,7 @@ class Datasource(ApiObject):
         raw_variable = self.bridge.get(endpoint).json()
         return Variable(raw_variable, self.api)
 
-    @validate_input(dict, ["name", "unit", "icon"])
+    @validate_input(dict, ["name", "unit"])
     def create_variable(self, data):
         response = self.bridge.post('datasources/'+self.id+'/variables', data)
         return Variable(response.json(), self.api, datasource= self)
@@ -287,7 +287,6 @@ class Variable(ApiObject):
 
     def dummy_transform_function(self, values):
         return values
-
 
     @validate_input(dict, ["value"])
     def save_value(self, data):
