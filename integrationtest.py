@@ -15,18 +15,71 @@ class TestCreationOfValues(unittest.TestCase):
         self.variable = self.datasource.create_variable({"name":"vartest01", "unit":"x"})
 
 
-        for i in range(self.NUMBER_OF_VALUES):
-            self.variable.save_value({"value":i})
-
     def tearDown(self):
         self.variable.remove_variable()
         self.datasource.remove_datasource()
 
 
     def test_can_read_values_from_a_variable(self):
+
+        for i in range(self.NUMBER_OF_VALUES):
+            self.variable.save_value({"value":i})
+
         paginator = self.variable.get_values()
         values = paginator.get_all_items()
         self.assertEqual(len(values), self.NUMBER_OF_VALUES)
+
+
+    def test_can_create_values_using_bulk_operation(self):
+
+        values = []
+        for i in range(self.NUMBER_OF_VALUES):
+            values.append({"variable":self.variable.id, "value":i})
+        
+        response = self.api.save_collection(values)  
+        self.assertTrue(all(map(lambda x:x['status_code']==201, response)))
+
+        paginator = self.variable.get_values()
+        values = paginator.get_all_items()
+        self.assertEqual(len(values), self.NUMBER_OF_VALUES)
+
+    def test_if_there_are_errors_and_argument_force_is_falce_values_are_not_stored(self):
+
+        values = []
+        for i in range(self.NUMBER_OF_VALUES):
+            values.append({"variable":self.variable.id, "value":i})
+
+        values[0]['variable'] = ''
+        try:
+            response = self.api.save_collection(values) # force = false is default
+        except Exception as e:
+            self.assertEqual(len(filter(lambda x:x['status_code']!=204, e.detail)),1)
+
+        paginator = self.variable.get_values()
+        values = paginator.get_all_items()
+        self.assertEqual(len(values), 0)
+
+
+    def test_if_there_are_errors_and_argument_force_is_true_correct_values_are_stored(self):
+
+        values = []
+        for i in range(self.NUMBER_OF_VALUES):
+            values.append({"variable":self.variable.id, "value":i})
+
+        values[0]['variable'] = ''
+        number_of_errors = 0
+
+        try:
+            response = self.api.save_collection(values, force = True)
+        except Exception as e:
+            number_of_errors = len(filter(lambda x:x['status_code']!=201, e.detail)) 
+        
+        self.assertEqual(number_of_errors,1)
+
+        paginator = self.variable.get_values()
+        values = paginator.get_all_items()
+        self.assertEqual(len(values), self.NUMBER_OF_VALUES - number_of_errors )
+
 
 
 class TestDataSourcesEndPointNormalFlow(unittest.TestCase):
@@ -176,6 +229,7 @@ class TestDataSourceEndPointDeleteMethod(unittest.TestCase):
         self.NUMBER_OF_DATASOURCES = 3
         self.NUMBER_OF_VARIABLES_PER_DS = 2
         self.api = ApiClient(apikey, base_url = base_url)
+        [ds.remove_datasource() for ds in self.api.get_datasources().get_all_items()]
 
         self.ds_list = []
         for datasource in range(self.NUMBER_OF_DATASOURCES):

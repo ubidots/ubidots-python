@@ -4,18 +4,14 @@ import re
 
 BASE_URL = 'http://app.ubidots.com/api/v1.6/'
 
-#test_a_user_cannot_retrieve_a_datasourse_of_other_user
-#test_a_user_cannot_retrieve_a_variable_of_other_user
-
 def get_response_json_or_info_message(response):
     if response.status_code == 204:
-        resp = {"detail":"this response don't need a body", 'is_json': False}
+        resp = {"detail":"this response don't need a body"}
 
     try:
         resp = response.json()
-        resp['is_json'] = True
     except Exception, e:
-        resp ={"detail": "this response doesn't have a valid json response", 'is_json': False}
+        resp ={"detail": "this response doesn't have a valid json response"}
     return resp
 
 
@@ -36,16 +32,26 @@ class UbidotsError400(UbidotsHTTPError):
     """Exception thrown when server returns status code 400 Bad request"""
     pass
 
+
 class UbidotsError404(UbidotsHTTPError):
     """Exception thrown when server returns status code 404 Not found"""
     pass
+
 
 class UbidotsError500(UbidotsHTTPError):
     """Exception thrown when server returns status code 500"""
     pass
 
+
 class UbidotsForbiddenError(UbidotsHTTPError):
     """Exception thrown when server returns status code 401 or 403"""
+    pass
+
+
+class UbidotsBulkOperationError(UbidotsHTTPError):
+    '''
+    TODO: the 'status_code' for this exception is 200!! 
+    '''
     pass
 
 class UbidotsInvalidInputError(UbidotsError):
@@ -224,10 +230,10 @@ class ServerBridge(object):
 
 class ApiObject(object):
 
-    def __init__(self, raw_data, api, *args, **kwargs):
+    def __init__(self, raw_data, bridge, *args, **kwargs):
         self.raw = raw_data
-        self.api = api
-        self.bridge = self.api.bridge
+        self.api = kwargs.get('api', None)
+        self.bridge = bridge
         self._from_raw_to_attributes()
 
     def _from_raw_to_attributes(self):
@@ -235,16 +241,16 @@ class ApiObject(object):
             setattr(self, key, value)
 
 
-def transform_to_datasource_objects(raw_datasources):
+def transform_to_datasource_objects(raw_datasources, bridge):
     datasources = []
     for ds in raw_datasources:
-        datasources.append(Datasource(ds, self))
+        datasources.append(Datasource(ds, bridge))
     return datasources
 
-def transform_to_variable_objects(raw_variables):
+def transform_to_variable_objects(raw_variables, bridge):
     variables = []
     for variable in raw_variables:
-        variables.append(Variable(variable, self))
+        variables.append(Variable(variable, bridge))
     return variables
 
 
@@ -257,18 +263,16 @@ class Datasource(ApiObject):
     def get_variables(self):
         endpoint = 'datasources/'+self.id+'/variables'
         response = self.bridge.get(endpoint)
-        if response.status_code == 200:
-            return Paginator(self.bridge, response.json(), self.api._transform_to_variable_objects, endpoint)
+        return self.get_new_paginator(self.bridge, response.json(), transform_to_variable_objects, endpoint)
 
-    def get_variable(self, var_id):
-        endpoint = 'variables/' + var_id
-        raw_variable = self.bridge.get(endpoint).json()
-        return Variable(raw_variable, self.api)
+    def get_new_paginator(self, bridge, json_data, transform_function, endpoint ):
+        return Paginator(bridge, json_data, transform_function, endpoint)        
+
 
     @validate_input(dict, ["name", "unit"])
     def create_variable(self, data):
         response = self.bridge.post('datasources/'+self.id+'/variables', data)
-        return Variable(response.json(), self.api, datasource= self)
+        return Variable(response.json(), self.bridge, datasource= self)
 
     def __repr__(self):
         return self.name
@@ -276,17 +280,18 @@ class Datasource(ApiObject):
 
 class Variable(ApiObject):
 
-    def __init__(self, raw_data, api,  *args, **kwargs):
-        super(Variable, self).__init__(raw_data, api, *args, **kwargs)
-        self.datasource = self._get_datasource(**kwargs)    
+    def __init__(self, raw_data, bridge, *args, **kwargs):
+        super(Variable, self).__init__(raw_data, bridge, *args, **kwargs)
 
     def get_values(self):
         endpoint = 'variables/'+self.id+'/values'
         response = self.bridge.get(endpoint).json()
-        return Paginator(self.bridge, response, self.dummy_transform_function, endpoint)
+        return Paginator(self.bridge, response, self.get_transform_function(), endpoint)
 
-    def dummy_transform_function(self, values):
-        return values
+    def get_transform_function(self):
+        def transform_function(values, bridge):
+            return values
+        return transform_function
 
     @validate_input(dict, ["value"])
     def save_value(self, data):
@@ -307,12 +312,11 @@ class Variable(ApiObject):
     def remove_variable(self):
         return self.bridge.delete('variables/'+self.id)
 
-
-    def _get_datasource(self, **kwargs):
-        datasource = kwargs.get('datasource',None)
-        if not datasource:
-            datasource = self.api.get_datasource(url = self.datasource['url'])
-        return datasource
+    def get_datasource(self, **kwargs):
+        if not self._datasource:
+            api = ApiClient(server_bridge = self.bridge)
+            self._datasource = api.get_datasource(url = self.datasource['url'])
+        return self._datasource
 
     def __repr__(self):
         return self.name
@@ -347,7 +351,7 @@ class Paginator(object):
 
     def add_new_items(self,page, response):
         # page_number = self._get_page_number(response)
-        new_items = self.transform_function(response['results'])
+        new_items = self.transform_function(response['results'], self.bridge)
         self.items[page] = new_items
 
 
@@ -412,17 +416,19 @@ class Paginator(object):
 
 
 class ApiClient(object):
-    def __init__(self, apikey = None, token=None, base_url = None):
-        self.bridge = ServerBridge(apikey, token, base_url)
+    bridge_class = ServerBridge
 
-    def set_server_bridge(self, server_bridge):
-        self.bridge = server_bridge
-        
+    def __init__(self, apikey = None, token=None, base_url = None, bridge = None):
+        if bridge == None:
+            self.bridge = ServerBridge(apikey, token, base_url)
+        else:
+            self.bridge = bridge
+               
 
     def get_datasources(self):
         endpoint = 'datasources'
         response = self.bridge.get(endpoint).json()
-        return Paginator(self.bridge, response, self._transform_to_datasource_objects, endpoint)
+        return Paginator(self.bridge, response, transform_to_datasource_objects, endpoint)
 
     def get_datasource(self, ds_id=None, url=None):
         if not id and not url:
@@ -433,36 +439,31 @@ class ApiClient(object):
         elif url:
             raw_datasource = self.bridge.get_with_url(url).json()
 
-        return Datasource(raw_datasource, self)
+        return Datasource(raw_datasource, self.bridge)
 
     @validate_input(dict, ["name"])
     def create_datasource(self, data):
         raw_datasource = self.bridge.post('datasources/', data).json()
-        return Datasource(raw_datasource, self)
+        return Datasource(raw_datasource, self.bridge)
 
     def get_variables(self):
         endpoint = 'variables'
         response = self.bridge.get('variables').json()
-        return Paginator(self.bridge, response, self._transform_to_variable_objects, endpoint)
+        return Paginator(self.bridge, response, transform_to_variable_objects, endpoint)
 
     def get_variable(self, var_id):
         raw_variable = self.bridge.get('variables/'+ str(var_id) ).json()
-        return Variable(raw_variable, self)
+        return Variable(raw_variable, self.bridge)
 
     @validate_input(list, ["variable", "value"])
     def save_collection(self, data, force=False):
         path = "collections/values"
         path += ('', '?force=true')[int(force)]
-        return self.bridge.post(path, data).json()
+        response = self.bridge.post(path, data)
+        data = response.json()
+        if not self._all_collection_items_where_accepted(data):
+            raise UbidotsBulkOperationError("There was a problem with some of your posted items values.", response = response)
+        return data
 
-    def _transform_to_datasource_objects(self, raw_datasources):
-        datasources = []
-        for ds in raw_datasources:
-            datasources.append(Datasource(ds, self))
-        return datasources
-
-    def _transform_to_variable_objects(self, raw_variables):
-        variables = []
-        for variable in raw_variables:
-            variables.append(Variable(variable, self))
-        return variables
+    def _all_collection_items_where_accepted(self, data):
+        return all(map(lambda x: x['status_code'] ==201, data))
