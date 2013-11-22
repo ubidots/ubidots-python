@@ -97,9 +97,10 @@ This line creates a new data source:
 
 .. code-block:: python
 
-    new_datasource = api.create_datasource({"name":"myNewDs"})
+    new_datasource = api.create_datasource({"name":"myNewDs", "tags":["firstDs", "new"], "description":"any des"})
 
 
+Name is required; tags and description are optional
 This new data source can be used to track different variables, so let's create one.
 
 
@@ -111,9 +112,9 @@ A variable is a time-series containing different values over time. Let's create 
 
 .. code-block:: python
 
-    new_variable = new_datasource.create_variable({"name":"myNewVar"})
+    new_variable = new_datasource.create_variable({"name":"myNewVar", "unit":"Nw"})
 
-
+Name and unit are required.
 
 Saving Values in Bulk
 ---------------------
@@ -133,12 +134,21 @@ Values may also be added in bulk. This is especially useful when data is gathere
 Getting Values
 --------------
 
-To get the values for a variable, use the method get_values in an instance of the class Variable.
+To get the values for a variable, use the method get_values in an instance of the class Variable, this will return
+a Paginator wich has some public methods to deal with the pagination of the values.
 
 .. code-block:: python
 
-    all_values = new_variable.get_values()
+    pag_values = new_variable.get_values()
+    all_values = pag_values.get_all_items()
 
+You can also get the last x items posted:
+
+.. code-block:: python
+
+    x = 100
+    pag_values = new_variable.get_values()
+    last_100_values = pag_values.get_last_items(x)
 
 You may also want to get the last value of certain variable with this purpose, first you need to update the variable:
 
@@ -150,11 +160,15 @@ You may also want to get the last value of certain variable with this purpose, f
 Getting all the Data sources
 -----------------------------
 
-If you want to get all your data sources you can use the instance of the api directly:
+If you want to get all your data sources you can use the instance of the api directly, remember, given that the
+items are returned with pagination from the server, this method return a Paginator object that you can use
+to iterate throught the items:
 
 .. code-block:: python
 
-    all_my_datasources = api.get_datasources()
+    paginator_datasources = api.get_datasources()
+    all_my_datasources = paginator_datasources.get_all_items()
+    last_5_datasources = paginator_datasources.get_last_items(5)
 
 
 Getting a specific Data source
@@ -177,7 +191,8 @@ You can also retrieve all the variables of a data source:
 
 .. code-block:: python
 
-    all_datasource_variables = datasource.get_variables()
+    paginator_dsvar =  datasource.get_variables()
+    all_datasource_variables = paginator_dsvar.get_all_items()
 
 
 Getting a specific Variable
@@ -188,3 +203,36 @@ As with data sources, use your variable's id to retrieve the details about a var
 .. code-block:: python
 
     my_specific_variable = api.get_variable(id = '56799cf1231b28459f976417')
+
+
+Managing Exceptions
+--------------------
+
+Given that some errors would happen when a request is made to Ubidots, the api client has some built in exceptions
+to make easier to spot the problems, the exceptions are:
+
+UbidotsError400
+UbidotsError404
+UbidotsError500
+UbidotsForbiddenError
+UbidotsBulkOperationError
+UbidotsInvalidInputError
+
+you can use those exceptions in this way:
+
+.. code-block:: python
+
+    try:
+       my_specific_variable = api.get_variable(id = '56799cf1231b28459f976417')
+    except UbidotsError400 as e:
+        print "general description %s and the detail: %s"(e.message, e.detail)
+    except UbidotsForbiddenError as e:
+        print "for some reason I don't have permissions to get this variable"
+        print "general description %s and the detail: %s"(e.message, e.detail)
+
+
+In summary you can acces two attributes to know what happened error.message and error.detail you can also access
+error.status_code.
+
+
+
