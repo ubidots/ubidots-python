@@ -7,17 +7,17 @@ def read_file(name):
 
 setup(
     name='ubidots',
-    version='0.1.3-alpha',
+    version='1.6.0',
     author='Ubidots Team',
     author_email='devel@ubidots.com',
     url='https://github.com/ubidots/ubidots-python/',
     license='MIT',
-    description='Api Client to connect to ubidots.com',
+    description='Api Client to connect to ubidots.com api version 1.6',
     long_description=read_file("README.rst"),
     platforms='any',
     packages=find_packages(),
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 1.6",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
