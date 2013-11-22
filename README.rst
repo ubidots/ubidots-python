@@ -33,18 +33,6 @@ If you don't have *easy_install*, you can get it through *apt-get*:
 If you are using Microsoft Windows you can install pip from `here <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pip>`_.
 
 
-
-Running Tests
------------------------------
-
-To run the tests, execute the following from the root directory:
-
-.. code-block:: bash
-
-    $ python setup.py test
-
-
-
 Connecting to the API
 ----------------------
 
@@ -134,30 +122,23 @@ Values may also be added in bulk. This is especially useful when data is gathere
 Getting Values
 --------------
 
-To get the values for a variable, use the method get_values in an instance of the class Variable, this will return
-a Paginator wich has some public methods to deal with the pagination of the values.
+To get the values from a variable, use the method get_values in an instance of the class Variable, this will return a
+list like object with an aditional attribute items_in_server that tells you how many values this variable has stored
+in the server.
+
+If you only want the last x values call the method with the number of elements you want.
 
 .. code-block:: python
 
-    pag_values = new_variable.get_values()
-    all_values = pag_values.get_all_items()
+    #Getting all the values from the server, note that this could make a lot of request to the server and break your
+    #limit of request per second.
+    all_values = new_variable.get_values()
+    
+    #If you want the last 100 values you can use:
+    some_values = new_variable.get_values(100)
+    
 
-You can also get the last x items posted:
-
-.. code-block:: python
-
-    x = 100
-    pag_values = new_variable.get_values()
-    last_100_values = pag_values.get_last_items(x)
-
-You may also want to get the last value of certain variable with this purpose, first you need to update the variable:
-
-.. code-block:: python
-
-    new_variable = api.get_variable(new_variable.id)
-    last_value = new_variable.last_value
-
-Getting all the Data sources
+Getting a group of Data sources
 -----------------------------
 
 If you want to get all your data sources you can use the instance of the api directly, remember, given that the
@@ -165,10 +146,12 @@ items are returned with pagination from the server, this method return a Paginat
 to iterate throught the items:
 
 .. code-block:: python
-
-    paginator_datasources = api.get_datasources()
-    all_my_datasources = paginator_datasources.get_all_items()
-    last_5_datasources = paginator_datasources.get_last_items(5)
+    
+    #get all datasources
+    all_datasources = api.get_datasources()
+    
+    #get_the last 5 created datasources
+    some_datasources = api.get_datasources(5)
 
 
 Getting a specific Data source
@@ -184,15 +167,18 @@ For example, if a data source has the id 51c99cfdf91b28459f976414, it can be ret
     my_specific_datasource = api.get_datasource(id = '51c99cfdf91b28459f976414')
 
 
-Getting All Variables from a Data source
+Getting a group of  Variables from a Data source
 -----------------------------------------
 
 You can also retrieve all the variables of a data source:
 
 .. code-block:: python
 
-    paginator_dsvar =  datasource.get_variables()
-    all_datasource_variables = paginator_dsvar.get_all_items()
+    #get all variables
+    all_variables =  datasource.get_variables()
+    
+    #get last 10 variables
+    some_variables =  datasource.get_variables(10)
 
 
 Getting a specific Variable
