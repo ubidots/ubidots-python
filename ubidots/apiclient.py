@@ -263,7 +263,8 @@ class Datasource(ApiObject):
     def get_variables(self):
         endpoint = 'datasources/'+self.id+'/variables'
         response = self.bridge.get(endpoint)
-        return self.get_new_paginator(self.bridge, response.json(), transform_to_variable_objects, endpoint)
+        pag = self.get_new_paginator(self.bridge, response.json(), transform_to_variable_objects, endpoint)
+        return InfoList(pag) 
 
     def get_new_paginator(self, bridge, json_data, transform_function, endpoint ):
         return Paginator(bridge, json_data, transform_function, endpoint)        
@@ -283,10 +284,11 @@ class Variable(ApiObject):
     def __init__(self, raw_data, bridge, *args, **kwargs):
         super(Variable, self).__init__(raw_data, bridge, *args, **kwargs)
 
-    def get_values(self):
+    def get_values(self, numofvals="ALL"):
         endpoint = 'variables/'+self.id+'/values'
         response = self.bridge.get(endpoint).json()
-        return Paginator(self.bridge, response, self.get_transform_function(), endpoint)
+        pag = Paginator(self.bridge, response, self.get_transform_function(), endpoint)
+        return InfoList(pag, numofvals)
 
     def get_transform_function(self):
         def transform_function(values, bridge):
@@ -414,6 +416,21 @@ class Paginator(object):
     def _add_items_to_results(self, raw_results):
         self.result[self.current_page] = raw_result
 
+class InfoList(list):
+    def __init__(self, paginator, numofitems='ALL'):
+        self.paginator = paginator
+        self.items_in_server = paginator.count
+        items = self.get_items(numofitems)
+        super(InfoList, self).__init__(items)
+
+    def get_items(self, numofitems):
+
+        if isinstance(numofitems, int):
+           return self.paginator.get_last_items(numofitems)
+        else:
+            return self.paginator.get_all_items() 
+
+
 
 class ApiClient(object):
     bridge_class = ServerBridge
@@ -425,10 +442,11 @@ class ApiClient(object):
             self.bridge = bridge
                
 
-    def get_datasources(self):
+    def get_datasources(self, numofdsources='ALL'):
         endpoint = 'datasources'
         response = self.bridge.get(endpoint).json()
-        return Paginator(self.bridge, response, transform_to_datasource_objects, endpoint)
+        pag = Paginator(self.bridge, response, transform_to_datasource_objects, endpoint)
+        return InfoList(pag, numofdsources)
 
     def get_datasource(self, ds_id=None, url=None):
         if not id and not url:
@@ -446,10 +464,11 @@ class ApiClient(object):
         raw_datasource = self.bridge.post('datasources/', data).json()
         return Datasource(raw_datasource, self.bridge)
 
-    def get_variables(self):
+    def get_variables(self, numofvars = 'ALL'):
         endpoint = 'variables'
         response = self.bridge.get('variables').json()
-        return Paginator(self.bridge, response, transform_to_variable_objects, endpoint)
+        pag = Paginator(self.bridge, response, transform_to_variable_objects, endpoint)
+        return InfoList(pag,numofvars)
 
     def get_variable(self, var_id):
         raw_variable = self.bridge.get('variables/'+ str(var_id) ).json()

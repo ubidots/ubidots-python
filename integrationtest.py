@@ -25,8 +25,7 @@ class TestCreationOfValues(unittest.TestCase):
         for i in range(self.NUMBER_OF_VALUES):
             self.variable.save_value({"value":i})
 
-        paginator = self.variable.get_values()
-        values = paginator.get_all_items()
+        values = self.variable.get_values()
         self.assertEqual(len(values), self.NUMBER_OF_VALUES)
 
 
@@ -39,8 +38,8 @@ class TestCreationOfValues(unittest.TestCase):
         response = self.api.save_collection(values)  
         self.assertTrue(all(map(lambda x:x['status_code']==201, response)))
 
-        paginator = self.variable.get_values()
-        values = paginator.get_all_items()
+        values = self.variable.get_values()
+
         self.assertEqual(len(values), self.NUMBER_OF_VALUES)
 
     def test_if_there_are_errors_and_argument_force_is_falce_values_are_not_stored(self):
@@ -55,8 +54,7 @@ class TestCreationOfValues(unittest.TestCase):
         except Exception as e:
             self.assertEqual(len(filter(lambda x:x['status_code']!=204, e.detail)),1)
 
-        paginator = self.variable.get_values()
-        values = paginator.get_all_items()
+        values = self.variable.get_values()
         self.assertEqual(len(values), 0)
 
 
@@ -76,8 +74,7 @@ class TestCreationOfValues(unittest.TestCase):
         
         self.assertEqual(number_of_errors,1)
 
-        paginator = self.variable.get_values()
-        values = paginator.get_all_items()
+        values = self.variable.get_values()
         self.assertEqual(len(values), self.NUMBER_OF_VALUES - number_of_errors )
 
 
@@ -88,6 +85,7 @@ class TestDataSourcesEndPointNormalFlow(unittest.TestCase):
         self.NUMBER_OF_DATASOURCES = 3
         self.NUMBER_OF_VARIABLES_PER_DS = 2
         self.api = ApiClient(apikey, base_url = base_url)
+        [ds.remove_datasource() for ds in self.api.get_datasources()]
 
         self.ds_list = []
         self.var_list = []
@@ -99,7 +97,7 @@ class TestDataSourcesEndPointNormalFlow(unittest.TestCase):
                 self.var_list.append(var)
 
     def tearDown(self):
-        [ds.remove_datasource() for ds in self.api.get_datasources().get_all_items()]
+        [ds.remove_datasource() for ds in self.api.get_datasources()]
 
 
     ## Section list create datasources ##
@@ -110,8 +108,7 @@ class TestDataSourcesEndPointNormalFlow(unittest.TestCase):
 
 
     def test_all_datasources_has_been_created_and_can_be_retrieved(self):
-        ds_paginator = self.api.get_datasources()
-        datasources = ds_paginator.get_all_items()
+        datasources = self.api.get_datasources()
         self.assertEqual(len(datasources), self.NUMBER_OF_DATASOURCES)
 
 
@@ -127,9 +124,9 @@ class TestDataSourcesEndPointNormalFlow(unittest.TestCase):
     ### Section List Variables #####
 
     def test_all_user_variables_can_be_retrieved(self):
-        var_paginator = self.api.get_variables()
-        variables = var_paginator.get_all_items()
+        variables = self.api.get_variables()
         self.assertEqual(len(variables), self.NUMBER_OF_DATASOURCES*self.NUMBER_OF_VARIABLES_PER_DS)
+        self.assertEqual(self.NUMBER_OF_DATASOURCES*self.NUMBER_OF_VARIABLES_PER_DS, variables.items_in_server)
 
 
 
@@ -144,10 +141,9 @@ class TestDataSourcesEndPointNormalFlow(unittest.TestCase):
     ### Section List Create Variables from Datasource ##
 
     def test_all_variables_has_been_created_and_can_be_retrievend_from_datasources_theirs_respective_datasource(self):
-        ds_paginator = self.api.get_datasources()
-        datasources = ds_paginator.get_all_items()
+        datasources = self.api.get_datasources()
         for datasource in datasources:
-            variables = datasource.get_variables().get_all_items()
+            variables = datasource.get_variables()
             self.assertEqual(len(variables), self.NUMBER_OF_VARIABLES_PER_DS)
 
     def test_detail_of_variable_is_returned_when_created(self):
@@ -163,7 +159,7 @@ class TestDataSourcesEndPointErrors(unittest.TestCase):
         self.api = ApiClient(apikey, base_url = base_url)
 
     def tearDown(self):
-        [ds.remove_datasource() for ds in self.api.get_datasources().get_all_items()]
+        [ds.remove_datasource() for ds in self.api.get_datasources()]
 
     @contextmanager
     def set_bad_token(self, api):
@@ -185,7 +181,7 @@ class TestDataSourcesEndPointErrors(unittest.TestCase):
 
         yield {"datasource":ds2, "variables":[var2]}
 
-        datasources = api2.get_datasources().get_all_items()
+        datasources = api2.get_datasources()
         [ds.remove_datasource() for ds in datasources]
 
 
@@ -229,7 +225,7 @@ class TestDataSourceEndPointDeleteMethod(unittest.TestCase):
         self.NUMBER_OF_DATASOURCES = 3
         self.NUMBER_OF_VARIABLES_PER_DS = 2
         self.api = ApiClient(apikey, base_url = base_url)
-        [ds.remove_datasource() for ds in self.api.get_datasources().get_all_items()]
+        [ds.remove_datasource() for ds in self.api.get_datasources()]
 
         self.ds_list = []
         for datasource in range(self.NUMBER_OF_DATASOURCES):
@@ -239,21 +235,20 @@ class TestDataSourceEndPointDeleteMethod(unittest.TestCase):
                 ds.create_variable({"name":"var%s"%variable, "unit":"x"})
 
     def tearDown(self):
-        [ds.remove_datasource() for ds in self.api.get_datasources().get_all_items()]
+        [ds.remove_datasource() for ds in self.api.get_datasources()]
 
 
     def test_datasources_and_variables_are_deleted_correctly(self):
 
         for datasource in self.ds_list:
-            variables = datasource.get_variables().get_all_items()
+            variables = datasource.get_variables()
             for variable in variables:
                 variable.remove_variable()
-            variables = datasource.get_variables().get_all_items()
+            variables = datasource.get_variables()
             self.assertEqual(len(variables), 0)
 
 
         [ds.remove_datasource() for ds in self.ds_list]
 
-        ds_paginator = self.api.get_datasources()
-        datasources = ds_paginator.get_all_items()
+        datasources = self.api.get_datasources()
         self.assertEqual(len(datasources), 0)
