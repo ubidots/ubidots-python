@@ -260,11 +260,12 @@ class Datasource(ApiObject):
         response = self.bridge.delete('datasources/'+ self.id)
         return response
 
-    def get_variables(self):
+    def get_variables(self, numofvars = "ALL"):
         endpoint = 'datasources/'+self.id+'/variables'
         response = self.bridge.get(endpoint)
         pag = self.get_new_paginator(self.bridge, response.json(), transform_to_variable_objects, endpoint)
-        return InfoList(pag) 
+        return InfoList(pag, numofvars) 
+
 
     def get_new_paginator(self, bridge, json_data, transform_function, endpoint ):
         return Paginator(bridge, json_data, transform_function, endpoint)        
