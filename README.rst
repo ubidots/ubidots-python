@@ -191,14 +191,14 @@ As with data sources, use your variable's id to retrieve the details about a var
     my_specific_variable = api.get_variable(id = '56799cf1231b28459f976417')
 
 
-Managing Exceptions
+Managing HTTP Exceptions
 --------------------
 
 Given that some errors would happen when a request is made to Ubidots, the api client has some built in exceptions
 to make easier to spot the problems, the exceptions are:
 
 UbidotsError400, UbidotsError404, UbidotsError500, UbidotsForbiddenError,
-UbidotsBulkOperationError and UbidotsInvalidInputError
+UbidotsBulkOperationError
 
 each error has the attributes:
 message: for a general message of the error.
@@ -215,3 +215,33 @@ you can use those exceptions in this way:
     except UbidotsForbiddenError as e:
         print "for some reason I don't have permissions to get this variable"
         print "general description %s and the detail: %s"(e.message, e.detail)
+
+Other Exceptions
+----------------
+
+There is anoter exception UbidotsInvalidInputError wich is raised when the fields to create a Datasource a Variable
+or a Value are not complete.
+
+For this version of the api the the fields for each resource are:
+
+Datasource:
+   Required:
+       name: string.
+   Optional:
+       tags: list of strings.
+
+       description: string.
+
+Variables:
+    Required:
+        name: string.
+        
+        unit: string.
+
+Values:
+    Required:
+        value: number (integer or float).
+        
+        variable: string with the variable of the id id.
+    Optional:
+        timestamp: unix timestamp.
