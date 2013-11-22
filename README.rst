@@ -197,28 +197,21 @@ Managing Exceptions
 Given that some errors would happen when a request is made to Ubidots, the api client has some built in exceptions
 to make easier to spot the problems, the exceptions are:
 
-UbidotsError400
-UbidotsError404
-UbidotsError500
-UbidotsForbiddenError
-UbidotsBulkOperationError
-UbidotsInvalidInputError
+UbidotsError400, UbidotsError404, UbidotsError500, UbidotsForbiddenError,
+UbidotsBulkOperationError and UbidotsInvalidInputError
+
+each error has the attributes:
+message: for a general message of the error.
+detail: generally a json from the server explaining in more detail the error.
 
 you can use those exceptions in this way:
 
 .. code-block:: python
 
     try:
-       my_specific_variable = api.get_variable(id = '56799cf1231b28459f976417')
+        my_specific_variable = api.get_variable(id = '56799cf1231b28459f976417')
     except UbidotsError400 as e:
-        print "general description %s and the detail: %s"(e.message, e.detail)
+        print "general description: %s; and the detail: %s"(e.message, e.detail)
     except UbidotsForbiddenError as e:
         print "for some reason I don't have permissions to get this variable"
         print "general description %s and the detail: %s"(e.message, e.detail)
-
-
-In summary you can acces two attributes to know what happened error.message and error.detail you can also access
-error.status_code.
-
-
-
