@@ -139,7 +139,7 @@ If you only want the last x values call the method with the number of elements y
     
 
 Getting a group of Data sources
------------------------------
+--------------------------------
 
 If you want to get all your data sources you can use the instance of the api directly, remember, given that the
 items are returned with pagination from the server, this method return a Paginator object that you can use
@@ -155,7 +155,7 @@ to iterate throught the items:
 
 
 Getting a specific Data source
-------------------------------
+-------------------------------
 
 Each data source has a unique id that tells the server which one to retrieve.
 
@@ -168,7 +168,7 @@ For example, if a data source has the id 51c99cfdf91b28459f976414, it can be ret
 
 
 Getting a group of  Variables from a Data source
------------------------------------------
+-------------------------------------------------
 
 You can also retrieve all the variables of a data source:
 
@@ -192,7 +192,7 @@ As with data sources, use your variable's id to retrieve the details about a var
 
 
 Managing HTTP Exceptions
---------------------
+-------------------------
 
 Given that some errors would happen when a request is made to Ubidots, the api client has some built in exceptions
 to make easier to spot the problems, the exceptions are:
