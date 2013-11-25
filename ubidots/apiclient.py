@@ -310,7 +310,16 @@ class Variable(ApiObject):
 
         path = 'variables/'+ self.id +'/values'
         path += ('', '?force=true')[int(force)]
-        return self.bridge.post(path, data).json()
+        response = self.bridge.post(path, data)
+        data = response.json()
+        if not self._all_values_where_accepted(data):
+            raise UbidotsBulkOperationError("There was a problem with some of your posted values.", response = response)
+        return data
+
+
+    def _all_values_where_accepted(self, data):
+        return all(map(lambda x: x['status_code'] ==201, data))
+
 
     def remove_variable(self):
         return self.bridge.delete('variables/'+self.id)

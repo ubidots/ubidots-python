@@ -18,3 +18,4 @@ lib/
 /docs/
 config.py
 config_production.py
+integrationtest.py
