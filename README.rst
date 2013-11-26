@@ -24,7 +24,7 @@ You can install pip in Linux and Mac using this command:
 
     $ sudo easy_install pip
 
-If you don't have *easy_install*, you can get it through *apt-get*:
+If you don't have *easy_install*, you can get it through *apt-get* on Debian-based distributions:
 
 .. code-block:: bash
     
