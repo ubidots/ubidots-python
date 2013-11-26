@@ -164,14 +164,14 @@ For example, if a data source has the id 51c99cfdf91b28459f976414, it can be ret
 Getting a group of  Variables from a Data source
 -------------------------------------------------
 
-You can also retrieve all the variables of a data source:
+With a data source. you can also retrieve some of all of its variables:
 
 .. code-block:: python
 
-    #get all variables
+    # Get all variables
     all_variables =  datasource.get_variables()
     
-    #get last 10 variables
+    # Get last 10 variables
     some_variables =  datasource.get_variables(10)
 
 
