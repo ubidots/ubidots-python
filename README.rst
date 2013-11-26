@@ -65,13 +65,13 @@ Given the instantiated variable, you can save a new value with the following lin
 
 .. code-block:: python
 
-    new_value = my_variable.save_value({'value':10})
+    new_value = my_variable.save_value({'value': 10})
 
 You can also specify a timestamp (optional)
 
 .. code-block:: python
 
-    new_value = my_variable.save_value({'value':10, 'timestamp':1376061804407})
+    new_value = my_variable.save_value({'value': 10, 'timestamp': 1376061804407})
 
 If no timestamp is specified, the API server will assign the current time to it. We think it's always better that you specify the timestamp so that
 it reflects the exact time when the value was captured, and not the time when it got to our servers.
@@ -85,7 +85,7 @@ This line creates a new data source:
 
 .. code-block:: python
 
-    new_datasource = api.create_datasource({"name":"myNewDs", "tags":["firstDs", "new"], "description":"any des"})
+    new_datasource = api.create_datasource({"name": "myNewDs", "tags": ["firstDs", "new"], "description": "any des"})
 
 
 Name is required; tags and description are optional
@@ -100,7 +100,7 @@ A variable is a time-series containing different values over time. Let's create 
 
 .. code-block:: python
 
-    new_variable = new_datasource.create_variable({"name":"myNewVar", "unit":"Nw"})
+    new_variable = new_datasource.create_variable({"name": "myNewVar", "unit": "Nw"})
 
 Name and unit are required.
 
