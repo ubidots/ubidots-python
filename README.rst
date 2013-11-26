@@ -137,16 +137,14 @@ If you only want the last N values call the method with the number of elements y
 Getting a group of Data sources
 --------------------------------
 
-If you want to get all your data sources you can use the instance of the api directly, remember, given that the
-items are returned with pagination from the server, this method return a Paginator object that you can use
-to iterate throught the items:
+If you want to get all your data sources you can a method on the ApiClient instance directly. This method return a Paginator object which you can use to iterate through all the items.
 
 .. code-block:: python
     
-    #get all datasources
+    # Get all datasources
     all_datasources = api.get_datasources()
     
-    #get_the last 5 created datasources
+    # Get the last five created datasources
     some_datasources = api.get_datasources(5)
 
 
