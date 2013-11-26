@@ -188,17 +188,13 @@ As with data sources, you can use your variable's ID to retrieve the details abo
 Managing HTTP Exceptions
 -------------------------
 
-Given that some errors would happen when a request is made to Ubidots, the api client has some built in exceptions
-to make easier to spot the problems, the exceptions are:
+Given that possibility that a request to Ubidots could result in an error, the API client bundles some exceptions to make easier to spot the problems. All exceptions inherit from the base UbidotsError. The full list of exceptions is:
 
-UbidotsError400, UbidotsError404, UbidotsError500, UbidotsForbiddenError,
-UbidotsBulkOperationError
+UbidotsError400, UbidotsError404, UbidotsError500, UbidotsForbiddenError, UbidotsBulkOperationError
 
-each error has the attributes:
-message: for a general message of the error.
-detail: generally a json from the server explaining in more detail the error.
+Each error has an attribute 'message' (a general message of the error) and 'detail' (usually JSON from the server providing more detail).
 
-you can use those exceptions in this way:
+You can gaurd for these exceptions in this way:
 
 .. code-block:: python
 
@@ -213,10 +209,7 @@ you can use those exceptions in this way:
 Other Exceptions
 ----------------
 
-There is anoter exception UbidotsInvalidInputError wich is raised when the fields to create a Datasource a Variable
-or a Value are not complete.
-
-For this version of the api the the fields for each resource are:
+There is anoter exception UbidotsInvalidInputError wich is raised when the parameters to a function call are invalid. The required fields for the parameter of each resource in this API version are:
 
 Datasource:
    Required:
