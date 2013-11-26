@@ -50,7 +50,7 @@ Once you have your API key, you can connect to the API by creating an ApiClient 
     api = ApiClient('7fj39fk3044045k89fbh34rsd9823jkfs8323')
 
 
-Now you have an instance of the apiclient ("api") which can be used to connect to the API service.
+Now you have an instance of ApiClient ("api") which can be used to connect to the API service.
 
 Saving a new Value to a Variable
 --------------------------------
