@@ -59,7 +59,7 @@ Retrieve the variable you'd like the value to be saved to:
 
 .. code-block:: python
 
-    my_variable = api.get_variable(id = '56799cf1231b28459f976417')
+    my_variable = api.get_variable('56799cf1231b28459f976417')
 
 Given the instantiated variable, you can save a new value with the following line:
 
@@ -164,7 +164,7 @@ For example, if a data source has the id 51c99cfdf91b28459f976414, it can be ret
 
 .. code-block:: python
 
-    my_specific_datasource = api.get_datasource(id = '51c99cfdf91b28459f976414')
+    my_specific_datasource = api.get_datasource('51c99cfdf91b28459f976414')
 
 
 Getting a group of  Variables from a Data source
@@ -188,7 +188,7 @@ As with data sources, use your variable's id to retrieve the details about a var
 
 .. code-block:: python
 
-    my_specific_variable = api.get_variable(id = '56799cf1231b28459f976417')
+    my_specific_variable = api.get_variable('56799cf1231b28459f976417')
 
 
 Managing HTTP Exceptions
@@ -209,7 +209,7 @@ you can use those exceptions in this way:
 .. code-block:: python
 
     try:
-        my_specific_variable = api.get_variable(id = '56799cf1231b28459f976417')
+        my_specific_variable = api.get_variable('56799cf1231b28459f976417')
     except UbidotsError400 as e:
         print "general description: %s; and the detail: %s"(e.message, e.detail)
     except UbidotsForbiddenError as e:
