@@ -178,7 +178,7 @@ With a data source. you can also retrieve some or all of its variables:
 Getting a specific Variable
 ------------------------------
 
-As with data sources, use your variable's id to retrieve the details about a variable:
+As with data sources, you can use your variable's ID to retrieve the details about it:
 
 .. code-block:: python
 
