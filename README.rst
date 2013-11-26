@@ -4,7 +4,7 @@ Ubidots Python API Client
 
 The Ubidots Python API Client makes calls to the `Ubidots Api <http://things.ubidots.com/api>`_.  The module is available on `PyPI <https://pypi.python.org/pypi/ubidots/>`_ as "ubidots".
 
-To follow this quickstart you'll need to install python 2.7 in your machine (either be it a computer or an python-capable device), you can find more details in `<http://www.python.org/download/>`_.
+To follow this quickstart you'll need to install python 2.7 in your machine (be it a computer or an python-capable device), you can find more details in `<http://www.python.org/download/>`_.
 
 
 Installing the Python library
