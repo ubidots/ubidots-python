@@ -87,7 +87,7 @@ This line creates a new data source:
     new_datasource = api.create_datasource({"name": "myNewDs", "tags": ["firstDs", "new"], "description": "any des"})
 
 
-The name key is required, but the tags and description keys are optional. This new data source can be used to track different variables, so let's create one.
+The 'name' key is required, but the 'tags' and 'description' keys are optional. This new data source can be used to track different variables, so let's create one.
 
 
 Creating a Variable
@@ -100,7 +100,7 @@ A variable is a time-series containing different values over time. Let's create 
 
     new_variable = new_datasource.create_variable({"name": "myNewVar", "unit": "Nw"})
 
-The name and unit keys are required.
+The 'name' and 'unit' keys are required.
 
 Saving Values in Bulk
 ---------------------
