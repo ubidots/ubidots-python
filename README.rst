@@ -151,9 +151,9 @@ If you want to get all your data sources you can a method on the ApiClient insta
 Getting a specific Data source
 -------------------------------
 
-Each data source has a unique id that tells the server which one to retrieve.
+Each data source is identified by an ID. A specific data source can be retrieved from the server using this ID.
 
-For example, if a data source has the id 51c99cfdf91b28459f976414, it can be retrieved using the method get_datasource of the ApiClient instance:
+For example, if a data source has the id 51c99cfdf91b28459f976414, it can be retrieved as follows:
 
 
 .. code-block:: python
