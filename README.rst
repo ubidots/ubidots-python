@@ -100,7 +100,7 @@ A variable is a time-series containing different values over time. Let's create 
 
     new_variable = new_datasource.create_variable({"name": "myNewVar", "unit": "Nw"})
 
-Name and unit are required.
+The name and unit keys are required.
 
 Saving Values in Bulk
 ---------------------
