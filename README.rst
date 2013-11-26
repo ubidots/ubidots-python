@@ -40,7 +40,7 @@ Before playing with the API you must be able to connect to it using your private
 
 If you don't have an account yet, you can `create one here <http://app.ubidots.com/accounts/signup/>`_.
 
-Once you have your API key, you can connect to the API by creating an ApiClient instance. Let's assume your API key is: "7fj39fk3044045k89fbh34rsd9823jkfs8323" then your code would look like this:
+Once you have your API key, you can connect to the API by creating an ApiClient instance. Let's assume your API key is: "7fj39fk3044045k89fbh34rsd9823jkfs8323". Then your code would look like this:
 
 
 .. code-block:: python
