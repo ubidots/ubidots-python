@@ -73,7 +73,7 @@ You can also specify a timestamp (optional):
 
     new_value = my_variable.save_value({'value': 10, 'timestamp': 1376061804407})
 
-If no timestamp is specified, the API server will assign the current time to it. We think it's always better if you specify the timestamp so that the record reflects the exact time when the value was captured, and not the time it got to our servers.
+If no timestamp is specified, the API server will assign the current time to it. We think it's always better for you to specify the timestamp so that the record reflects the exact time when the value was captured, and not the time it got to our servers.
 
 Creating a DataSource
 ----------------------
