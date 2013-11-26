@@ -211,10 +211,10 @@ you can use those exceptions in this way:
     try:
         my_specific_variable = api.get_variable('56799cf1231b28459f976417')
     except UbidotsError400 as e:
-        print "general description: %s; and the detail: %s"(e.message, e.detail)
+        print "General Description: %s; and the detail: %s" % (e.message, e.detail)
     except UbidotsForbiddenError as e:
-        print "for some reason I don't have permissions to get this variable"
-        print "general description %s and the detail: %s"(e.message, e.detail)
+        print "For some reason my account does not have permission to read this variable"
+        print "General Description: %s; and the detail: %s" % (e.message, e.detail)
 
 Other Exceptions
 ----------------
