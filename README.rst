@@ -120,19 +120,17 @@ Values may also be added in bulk. This is especially useful when data is gathere
 Getting Values
 --------------
 
-To get the values from a variable, use the method get_values in an instance of the class Variable, this will return a
-list like object with an aditional attribute items_in_server that tells you how many values this variable has stored
-in the server.
+To get the values of a variable, use the method get_values in an instance of the class Variable. This will return a list like object with an aditional attribute items_in_server that tells you how many values this variable has stored on the server.
 
-If you only want the last x values call the method with the number of elements you want.
+If you only want the last N values call the method with the number of elements you want.
 
 .. code-block:: python
 
-    #Getting all the values from the server, note that this could make a lot of request to the server and break your
-    #limit of request per second.
+    # Getting all the values from the server. Note that this could result in a
+    # lot of requests, and potentially violate your requests per second limit.
     all_values = new_variable.get_values()
     
-    #If you want the last 100 values you can use:
+    # If you want just the last 100 values you can use:
     some_values = new_variable.get_values(100)
     
 
