@@ -164,7 +164,7 @@ For example, if a data source has the id 51c99cfdf91b28459f976414, it can be ret
 Getting a group of  Variables from a Data source
 -------------------------------------------------
 
-With a data source. you can also retrieve some of all of its variables:
+With a data source. you can also retrieve some or all of its variables:
 
 .. code-block:: python
 
