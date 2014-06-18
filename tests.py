@@ -223,17 +223,17 @@ class TestDatasource(unittest.TestCase):
         raw_ds = {"id": ds_id, "name":"testds", "tags":['a', 'b', 'c'], "description":"the description"}
         bridge = Mock()
         ds = Datasource(raw_ds, bridge)
-        ds.get_new_paginator = Mock()
+        ds.get_new_paginator = MagicMock()
         ds.get_variables()
         bridge.get.assert_called_once_with(endpoint)
 
-    def test_method_get_variables_make_a_request_to_an_specific_endpoint(self):
+    def test_method_get_variables_calls_paginator(self):
         ds_id = 'any_id'
         endpoint = 'datasources/' + ds_id + '/variables'
         raw_ds = {"id": ds_id, "name":"testds", "tags":['a', 'b', 'c'], "description":"the description"}
         bridge = Mock()
         ds = Datasource(raw_ds, bridge)
-        ds.get_new_paginator = Mock()
+        ds.get_new_paginator = MagicMock()
         ds.get_variables()
         ds.get_new_paginator.assert_called_once_with(bridge, ANY, ANY, endpoint)
 
