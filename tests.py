@@ -126,9 +126,6 @@ class TestDecorators(unittest.TestCase):
         self.assertEqual(wrapper(Mock(), [{"p": 1, "q": 1}]), 911)
         self.assertEqual(wrapper(Mock(), [{"p": 1, "q": 1}, {"p": 2, "q": 2}]), 911)
 
-if __name__ == '__main__':
-    unittest.main()
-
 
 class TestPaginator(unittest.TestCase):
 
@@ -251,3 +248,7 @@ class TestApiClient(unittest.TestCase):
         bridge = Mock()
         api = ApiClient(bridge = bridge)
         self.assertEqual(api.bridge, bridge)        
+
+
+if __name__ == '__main__':
+    unittest.main()
