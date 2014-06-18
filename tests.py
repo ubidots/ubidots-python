@@ -6,6 +6,7 @@ from ubidots.apiclient import validate_input
 from ubidots.apiclient import UbidotsError400, UbidotsError500, UbidotsInvalidInputError
 from ubidots.apiclient import Paginator
 from ubidots.apiclient import ApiObject
+from ubidots.apiclient import Variable
 from ubidots.apiclient import Datasource
 from ubidots.apiclient import ApiClient
 from mock import patch, MagicMock, Mock, ANY
@@ -239,7 +240,46 @@ class TestDatasource(unittest.TestCase):
 
 
 class TestVariables(unittest.TestCase):
-    pass
+    
+    def setUp(self):
+        self.bridge = Mock()
+        self.bridge.post = Mock()
+        self.id = 'any_id'
+        self.var = Variable({'id': self.id}, self.bridge)        
+
+    def test_save_value_basic(self):
+        value = 2.5
+        self.bridge.post = Mock()
+        self.var.save_value({'value': value})
+        self.bridge.post.assert_called_any()
+
+        url, data = self.bridge.post.call_args[0]        
+        self.assertEqual(url, "variables/%s/values" % self.id)
+        self.assertTrue(data.has_key('value'))
+        self.assertEqual(data['value'], value)
+
+    def test_save_value_with_timestamp(self):
+        value = 2.5
+        timestamp = 1403071382000l
+        self.var.save_value({'value': value, 'timestamp': timestamp})
+        self.bridge.post.assert_called_any()
+
+        url, data = self.bridge.post.call_args[0]
+        self.assertEqual(url, "variables/%s/values" % self.id)
+        self.assertTrue(data.has_key('value'))
+        self.assertTrue(data.has_key('timestamp'))
+        self.assertEqual(data['value'], value)
+        self.assertEqual(data['timestamp'], timestamp)
+
+    def test_save_value_missing_value(self):
+        timestamp = 1403071382000l
+        self.assertRaises(UbidotsInvalidInputError, self.var.save_value, {})
+        self.assertRaises(UbidotsInvalidInputError, self.var.save_value,
+                          {'timestamp': timestamp})
+        
+    def test_save_value_bad_timestamp_type(self):
+        arg = {'value': 2.5, 'timestamp': 1403071382000.3}
+        self.assertRaises(UbidotsInvalidInputError, self.var.save_value, arg)
 
 
 class TestApiClient(unittest.TestCase):
