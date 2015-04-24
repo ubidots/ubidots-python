@@ -52,8 +52,8 @@ Once you have your API key, you can connect to the API by creating an ApiClient 
 
 Now you have an instance of ApiClient ("api") which can be used to connect to the API service.
 
-Saving a new Value to a Variable
---------------------------------
+Saving a Value to a Variable
+----------------------------
 
 Retrieve the variable you'd like the value to be saved to:
 
@@ -126,13 +126,28 @@ If you only want the last N values call the method with the number of elements y
 
 .. code-block:: python
 
-    # Getting all the values from the server. Note that this could result in a
-    # lot of requests, and potentially violate your requests per second limit.
+    # Getting all the values from the server. WARNING: If your variable has millions of datapoints, then this will take forever or break your code!
     all_values = new_variable.get_values()
     
     # If you want just the last 100 values you can use:
     some_values = new_variable.get_values(100)
     
+
+Getting the Last Value of a Variable
+------------------------------------
+
+To get the last value of a variable, call just one item in the get_values method:
+
+.. code-block:: python
+
+    last_value = new_variable.get_values(1)
+
+Then select the first item of the list (last_value[0]), which is a dict, and retrieve the "value" key:
+
+.. code-block:: python
+
+    print last_value[0]['value']
+
 
 Getting a group of Data sources
 --------------------------------
