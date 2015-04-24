@@ -136,7 +136,7 @@ If you only want the last N values call the method with the number of elements y
 Getting the Last Value of a Variable
 ------------------------------------
 
-To get the last value of a variable, call just one item in the get_values method:
+To get the last value of a variable, get a single item in the get_values method:
 
 .. code-block:: python
 
