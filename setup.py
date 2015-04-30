@@ -7,7 +7,7 @@ def read_file(name):
 
 setup(
     name='ubidots',
-    version='1.6.1',
+    version='1.6.2',
     author='Ubidots Team',
     author_email='devel@ubidots.com',
     url='https://github.com/ubidots/ubidots-python/',
@@ -17,7 +17,7 @@ setup(
     platforms='any',
     packages=find_packages(),
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
@@ -29,12 +29,12 @@ setup(
         "Topic :: System :: Hardware"
     ],
     install_requires=[
-        "requests >= 1.2.3",
+        "requests >= 2.5.1",
     ],
     test_suite='nose.collector',
     tests_require=[
         'mock >= 1.0.1',
         'nose >= 1.3.0',
-        'requests >= 1.2.3'
+        'requests >= 2.5.1'
     ]
 )
