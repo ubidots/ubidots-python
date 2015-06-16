@@ -121,6 +121,7 @@ To save several values to a single variable:
 To update several variables in a single request:
 
 .. code-block:: python
+
     api.save_collection([{'variable': '557f686f7625426a41a42f49', 'value': 10}, {'variable': '557f68747625426b97263cba', 'value':20}])
 
 
