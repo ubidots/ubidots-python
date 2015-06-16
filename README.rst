@@ -105,7 +105,9 @@ The 'name' and 'unit' keys are required.
 Saving Values in Bulk
 ---------------------
 
-Values may also be added in bulk. This is especially useful when data is gathered offline and connection to the internet is limited.
+This method used the "collections" API endpoints: http://ubidots.com/docs/api/v1_6/collections
+
+To save several values to a single variable:
 
 .. code-block:: python
 
@@ -115,6 +117,11 @@ Values may also be added in bulk. This is especially useful when data is gathere
        {'timestamp': 1380558973516, 'value': 50},
        {'timestamp': 1380558973617, 'value': 30}
    ])
+
+To update several variables in a single request:
+
+.. code-block:: python
+    api.save_collection([{'variable': '557f686f7625426a41a42f49', 'value': 10}, {'variable': '557f68747625426b97263cba', 'value':20}])
 
 
 Getting Values
@@ -131,7 +138,6 @@ If you only want the last N values call the method with the number of elements y
     
     # If you want just the last 100 values you can use:
     some_values = new_variable.get_values(100)
-    
 
 Getting the Last Value of a Variable
 ------------------------------------
@@ -147,7 +153,13 @@ Then select the first item of the list (last_value[0]), which is a dict, and ret
 .. code-block:: python
 
     print last_value[0]['value']
-
+    
+    # Then you can read this value and do something:
+    
+    if last_value[0]['value']:
+        print "Switch is ON"
+    else:
+        print "Switch is OFF"
 
 Getting a group of Data sources
 --------------------------------
