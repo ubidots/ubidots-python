@@ -4,14 +4,15 @@ import re
 
 BASE_URL = 'http://app.ubidots.com/api/v1.6/'
 
+
 def get_response_json_or_info_message(response):
     if response.status_code == 204:
-        resp = {"detail":"this response don't need a body"}
+        resp = {"detail": "this response don't need a body"}
 
     try:
         resp = response.json()
-    except Exception, e:
-        resp ={"detail": "this response doesn't have a valid json response"}
+    except Exception:
+        resp = {"detail": "this response doesn't have a valid json response"}
     return resp
 
 
@@ -144,13 +145,12 @@ def validate_input(type, required_keys=[]):
     return real_decorator
 
 
-
 class ServerBridge(object):
     '''
     Responsabilites: Make petitions to the browser with the right headers and arguments
     '''
 
-    def __init__(self, apikey=None, token=None, base_url = None):
+    def __init__(self, apikey=None, token=None, base_url=None):
         self.base_url = base_url or BASE_URL
         if apikey:
             self._token = None
@@ -162,7 +162,6 @@ class ServerBridge(object):
             self._token = token
             self._set_token_header()
 
-
     def _get_token(self):
         self._token = self._post_with_apikey('auth/token').json()['token']
         self._set_token_header()
@@ -170,45 +169,42 @@ class ServerBridge(object):
     def _set_token_header(self):
         self._token_header = {'X-AUTH-TOKEN': self._token}
 
-
     def initialize(self):
         if self._apikey:
             self._get_token()
 
-
     @raise_informative_exception([400, 404, 500, 401, 403])
     def _post_with_apikey(self, path):
         headers = self._prepare_headers(self._apikey_header)
-        response = requests.post(self.base_url + path, headers =  headers)
+        response = requests.post(self.base_url + path, headers=headers)
         return response
 
     @try_again([403, 401])
     @raise_informative_exception([400, 404, 500])
-    def get(self, path):
+    def get(self, path, **kwargs):
         headers = self._prepare_headers(self._token_header)
-        response = requests.get(self.base_url + path, headers = headers)
+        response = requests.get(self.base_url + path, headers=headers, **kwargs)
         return response
 
-    def get_with_url(self, url):
+    def get_with_url(self, url, **kwargs):
         headers = self._prepare_headers(self._token_header)
-        response = requests.get(url, headers = headers)
+        response = requests.get(url, headers=headers, **kwargs)
         return response
 
     @try_again([403, 401])
     @raise_informative_exception([400, 404, 500])
-    def post(self, path, data):
+    def post(self, path, data, **kwargs):
         headers = self._prepare_headers(self._token_header)
         data = self._prepare_data(data)
-        response = requests.post(self.base_url + path, data=data, headers = headers)
+        response = requests.post(self.base_url + path, data=data, headers=headers, **kwargs)
         return response
 
     @try_again([403, 401])
     @raise_informative_exception([400, 404, 500])
-    def delete(self, path):
+    def delete(self, path, **kwargs):
         headers = self._prepare_headers(self._token_header)
-        response = requests.delete(self.base_url + path, headers = headers)
+        response = requests.delete(self.base_url + path, headers=headers, **kwargs)
         return response
-
 
     def _prepare_headers(self, *args, **kwargs):
         headers = self._transform_a_list_of_dictionaries_to_a_dictionary(args)
@@ -224,9 +220,10 @@ class ServerBridge(object):
     def _transform_a_list_of_dictionaries_to_a_dictionary(self, list_of_dicts):
         headers = {}
         for dictionary in list_of_dicts:
-            for key,val in dictionary.items():
+            for key, val in dictionary.items():
                 headers[key] = val
         return headers
+
 
 class ApiObject(object):
 
@@ -247,6 +244,7 @@ def transform_to_datasource_objects(raw_datasources, bridge):
         datasources.append(Datasource(ds, bridge))
     return datasources
 
+
 def transform_to_variable_objects(raw_variables, bridge):
     variables = []
     for variable in raw_variables:
@@ -257,24 +255,22 @@ def transform_to_variable_objects(raw_variables, bridge):
 class Datasource(ApiObject):
 
     def remove_datasource(self):
-        response = self.bridge.delete('datasources/'+ self.id)
+        response = self.bridge.delete('datasources/' + self.id)
         return response
 
-    def get_variables(self, numofvars = "ALL"):
-        endpoint = 'datasources/'+self.id+'/variables'
+    def get_variables(self, numofvars="ALL"):
+        endpoint = 'datasources/' + self.id + '/variables'
         response = self.bridge.get(endpoint)
         pag = self.get_new_paginator(self.bridge, response.json(), transform_to_variable_objects, endpoint)
-        return InfoList(pag, numofvars) 
+        return InfoList(pag, numofvars)
 
-
-    def get_new_paginator(self, bridge, json_data, transform_function, endpoint ):
-        return Paginator(bridge, json_data, transform_function, endpoint)        
-
+    def get_new_paginator(self, bridge, json_data, transform_function, endpoint):
+        return Paginator(bridge, json_data, transform_function, endpoint)
 
     @validate_input(dict, ["name", "unit"])
     def create_variable(self, data):
-        response = self.bridge.post('datasources/'+self.id+'/variables', data)
-        return Variable(response.json(), self.bridge, datasource= self)
+        response = self.bridge.post('datasources/' + self.id + '/variables', data)
+        return Variable(response.json(), self.bridge, datasource=self)
 
     def __repr__(self):
         return self.name
@@ -286,7 +282,7 @@ class Variable(ApiObject):
         super(Variable, self).__init__(raw_data, bridge, *args, **kwargs)
 
     def get_values(self, numofvals="ALL"):
-        endpoint = 'variables/'+self.id+'/values'
+        endpoint = 'variables/' + self.id + '/values'
         response = self.bridge.get(endpoint).json()
         pag = Paginator(self.bridge, response, self.get_transform_function(), endpoint)
         return InfoList(pag, numofvals)
@@ -301,33 +297,34 @@ class Variable(ApiObject):
         if not isinstance(data.get('timestamp', 0), (int, long)):
             raise UbidotsInvalidInputError('Key "timestamp" must point to an int value.')
 
-        return self.bridge.post('variables/'+ self.id +'/values', data).json()
+        return self.bridge.post('variables/' + self.id + '/values', data).json()
 
     @validate_input(list, ["value", "timestamp"])
     def save_values(self, data, force=False):
         if not all(isinstance(e['timestamp'], (int, long)) for e in data):
             raise UbidotsInvalidInputError('Key "timestamp" must point to an int value.')
 
-        path = 'variables/'+ self.id +'/values'
+        path = 'variables/' + self.id + '/values'
         path += ('', '?force=true')[int(force)]
         response = self.bridge.post(path, data)
         data = response.json()
         if not self._all_values_where_accepted(data):
-            raise UbidotsBulkOperationError("There was a problem with some of your posted values.", response = response)
+            raise UbidotsBulkOperationError("There was a problem with some of your posted values.", response=response)
         return data
 
-
     def _all_values_where_accepted(self, data):
-        return all(map(lambda x: x['status_code'] ==201, data))
-
+        return all(map(lambda x: x['status_code'] == 201, data))
 
     def remove_variable(self):
-        return self.bridge.delete('variables/'+self.id)
+        return self.bridge.delete('variables/' + self.id).json()
+
+    def remove_values(self, t_start, t_end):
+        return self.bridge.delete('variables/%s/values/%s/%s' % (self.id, t_start, t_end)).json()
 
     def get_datasource(self, **kwargs):
         if not self._datasource:
-            api = ApiClient(server_bridge = self.bridge)
-            self._datasource = api.get_datasource(url = self.datasource['url'])
+            api = ApiClient(server_bridge=self.bridge)
+            self._datasource = api.get_datasource(url=self.datasource['url'])
         return self._datasource
 
     def __repr__(self):
@@ -359,7 +356,6 @@ class Paginator(object):
         if self.count%self.items_per_page !=  0:
             number_of_pages +=1
         return number_of_pages
-
 
     def add_new_items(self,page, response):
         # page_number = self._get_page_number(response)
@@ -407,9 +403,9 @@ class Paginator(object):
         res = number_of_items%self.items_per_page
         one_more_page = 1        
         if res:
-            return self._filter_valid_pages(range(1,num_pages + 1 + one_more_page))
+            return self._filter_valid_pages(range(1, num_pages + 1 + one_more_page))
         else: 
-            return self._filter_valid_pages(range(1, num_pages +1))
+            return self._filter_valid_pages(range(1, num_pages + 1))
 
     def get_pages(self, pages):
         for page in pages:
@@ -417,14 +413,14 @@ class Paginator(object):
 
     def _flat_items(self, pages):
         nestedlist = [value for key, value in self.items.items() if key in pages]
-        return [ item for sublist in nestedlist for item in sublist ]
+        return [item for sublist in nestedlist for item in sublist]
 
     def _filter_valid_pages(self, list_of_pages):
         return list(set(list_of_pages) & set(self.pages))
 
-
     def _add_items_to_results(self, raw_results):
-        self.result[self.current_page] = raw_result
+        self.result[self.current_page] = raw_results
+
 
 class InfoList(list):
     def __init__(self, paginator, numofitems='ALL'):
@@ -434,38 +430,35 @@ class InfoList(list):
         super(InfoList, self).__init__(items)
 
     def get_items(self, numofitems):
-
         if isinstance(numofitems, int):
-           return self.paginator.get_last_items(numofitems)
+            return self.paginator.get_last_items(numofitems)
         else:
-            return self.paginator.get_all_items() 
-
+            return self.paginator.get_all_items()
 
 
 class ApiClient(object):
     bridge_class = ServerBridge
 
-    def __init__(self, apikey = None, token=None, base_url = None, bridge = None):
-        if bridge == None:
+    def __init__(self, apikey=None, token=None, base_url=None, bridge=None):
+        if bridge is None:
             self.bridge = ServerBridge(apikey, token, base_url)
         else:
             self.bridge = bridge
-               
 
-    def get_datasources(self, numofdsources='ALL'):
+    def get_datasources(self, numofdsources='ALL', **kwargs):
         endpoint = 'datasources'
-        response = self.bridge.get(endpoint).json()
+        response = self.bridge.get(endpoint, **kwargs).json()
         pag = Paginator(self.bridge, response, transform_to_datasource_objects, endpoint)
         return InfoList(pag, numofdsources)
 
-    def get_datasource(self, ds_id=None, url=None):
+    def get_datasource(self, ds_id=None, url=None, **kwargs):
         if not id and not url:
             raise UbidotsInvalidInputError("id or url required")
 
         if ds_id:
-            raw_datasource = self.bridge.get('datasources/'+ str(ds_id) ).json()
+            raw_datasource = self.bridge.get('datasources/' + str(ds_id), **kwargs).json()
         elif url:
-            raw_datasource = self.bridge.get_with_url(url).json()
+            raw_datasource = self.bridge.get_with_url(url, **kwargs).json()
 
         return Datasource(raw_datasource, self.bridge)
 
@@ -474,14 +467,14 @@ class ApiClient(object):
         raw_datasource = self.bridge.post('datasources/', data).json()
         return Datasource(raw_datasource, self.bridge)
 
-    def get_variables(self, numofvars = 'ALL'):
+    def get_variables(self, numofvars='ALL', **kwargs):
         endpoint = 'variables'
-        response = self.bridge.get('variables').json()
+        response = self.bridge.get('variables', **kwargs).json()
         pag = Paginator(self.bridge, response, transform_to_variable_objects, endpoint)
-        return InfoList(pag,numofvars)
+        return InfoList(pag, numofvars)
 
-    def get_variable(self, var_id):
-        raw_variable = self.bridge.get('variables/'+ str(var_id) ).json()
+    def get_variable(self, var_id, **kwargs):
+        raw_variable = self.bridge.get('variables/' + str(var_id), **kwargs).json()
         return Variable(raw_variable, self.bridge)
 
     @validate_input(list, ["variable", "value"])
@@ -491,8 +484,8 @@ class ApiClient(object):
         response = self.bridge.post(path, data)
         data = response.json()
         if not self._all_collection_items_where_accepted(data):
-            raise UbidotsBulkOperationError("There was a problem with some of your posted items values.", response = response)
+            raise UbidotsBulkOperationError("There was a problem with some of your posted items values.", response=response)
         return data
 
     def _all_collection_items_where_accepted(self, data):
-        return all(map(lambda x: x['status_code'] ==201, data))
+        return all(map(lambda x: x['status_code'] == 201, data))
