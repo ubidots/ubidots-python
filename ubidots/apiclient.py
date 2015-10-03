@@ -2,7 +2,7 @@ import requests
 import json
 import re
 
-BASE_URL = 'http://app.ubidots.com/api/v1.6/'
+BASE_URL = 'http://things.ubidots.com/api/v1.6/'
 
 
 def get_response_json_or_info_message(response):
