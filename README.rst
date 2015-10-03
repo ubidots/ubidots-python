@@ -14,7 +14,7 @@ Ubidots for python is available in PyPI and you can install it from the command 
 
 .. code-block:: bash
 
-    $ pip install ubidots==1.6.3
+    $ pip install ubidots==1.6.4
 
 Don't forget to use sudo if necessary.
 
