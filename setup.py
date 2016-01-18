@@ -7,7 +7,7 @@ def read_file(name):
 
 setup(
     name='ubidots',
-    version='1.6.4',
+    version='1.6.5',
     author='Ubidots Team',
     author_email='devel@ubidots.com',
     url='https://github.com/ubidots/ubidots-python/',
@@ -25,6 +25,7 @@ setup(
         "Programming Language :: Python :: 2.5",
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.4",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: System :: Hardware"
     ],
