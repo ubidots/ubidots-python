@@ -23,6 +23,6 @@ def check_requests_version():
 
 check_requests_version()
 
-from apiclient import ApiClient, Datasource, Variable, ServerBridge, Paginator
-from apiclient import UbidotsError400, UbidotsError404, UbidotsError500
-from apiclient import UbidotsForbiddenError, UbidotsBulkOperationError, UbidotsInvalidInputError
+from .apiclient import ApiClient, Datasource, Variable, ServerBridge, Paginator
+from .apiclient import UbidotsError400, UbidotsError404, UbidotsError500
+from .apiclient import UbidotsForbiddenError, UbidotsBulkOperationError, UbidotsInvalidInputError

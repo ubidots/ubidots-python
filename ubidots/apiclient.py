@@ -1,6 +1,10 @@
 import requests
 import json
 import re
+import sys
+
+if sys.version_info > (3,):
+    long = int
 
 BASE_URL = 'http://things.ubidots.com/api/v1.6/'
 
@@ -51,9 +55,10 @@ class UbidotsForbiddenError(UbidotsHTTPError):
 
 class UbidotsBulkOperationError(UbidotsHTTPError):
     '''
-    TODO: the 'status_code' for this exception is 200!! 
+    TODO: the 'status_code' for this exception is 200!!
     '''
     pass
+
 
 class UbidotsInvalidInputError(UbidotsError):
     """Exception thrown when client-side verification fails"""
@@ -66,15 +71,15 @@ def create_exception_object(response):
     code = response.status_code
 
     if code == 500:
-        return UbidotsError500("An Internal Server Error Occurred.", response = response)
+        return UbidotsError500("An Internal Server Error Occurred.", response=response)
     elif code == 400:
-        return UbidotsError400("Your response is invalid", response = response)
+        return UbidotsError400("Your response is invalid", response=response)
     elif code == 404:
-        return UbidotsError404("Resource responseed not found:\n  ", response = response)
+        return UbidotsError404("Resource responseed not found:\n  ", response=response)
     elif code in [403, 401]:
-        return UbidotsForbiddenError("Your token is invalid or you don't have permissions to access this resource:\n ", response = response)
+        return UbidotsForbiddenError("Your token is invalid or you don't have permissions to access this resource:\n ", response=response)
     else:
-        return UbidotsError("Not Handled Exception: ", response = response)
+        return UbidotsError("Not Handled Exception: ", response=response)
 
 
 def raise_informative_exception(list_of_error_codes):
@@ -87,7 +92,7 @@ def raise_informative_exception(list_of_error_codes):
                 except:
                     body = ""
 
-                #error = create_exception_object(response.status_code, body)
+                # error = create_exception_object(response.status_code, body)
                 error = create_exception_object(response)
                 raise error
             else:
@@ -136,7 +141,7 @@ def validate_input(type, required_keys=[]):
                         raise UbidotsInvalidInputError('Key "%s" is missing' % key)
 
             if isinstance(args[0], list):
-                map(check_keys, args[0])
+                list(map(check_keys, args[0]))
             elif isinstance(args[0], dict):
                 check_keys(args[0])
 
@@ -208,7 +213,9 @@ class ServerBridge(object):
 
     def _prepare_headers(self, *args, **kwargs):
         headers = self._transform_a_list_of_dictionaries_to_a_dictionary(args)
-        return dict(headers.items() + self._get_custom_headers().items() + kwargs.items())
+        headers.update(self._get_custom_headers())
+        headers.update(kwargs.items())
+        return headers
 
     def _prepare_data(self, data):
         return json.dumps(data)
@@ -351,24 +358,24 @@ class Paginator(object):
         return len(self.response['results'])
 
     def _get_number_of_pages(self):
-        if self.items_per_page == 0: return 0
-        number_of_pages = int(self.count/self.items_per_page)
-        if self.count%self.items_per_page !=  0:
-            number_of_pages +=1
+        if self.items_per_page == 0:
+            return 0
+        number_of_pages = int(self.count / self.items_per_page)
+        if self.count % self.items_per_page != 0:
+            number_of_pages += 1
         return number_of_pages
 
-    def add_new_items(self,page, response):
+    def add_new_items(self, page, response):
         # page_number = self._get_page_number(response)
         new_items = self.transform_function(response['results'], self.bridge)
         self.items[page] = new_items
-
 
     def _get_page_from_url(self, url):
         re_page = re.compile("page\s*=\s*(\d+)")
         try:
             return int(re_page.findall(url)[0])
         except:
-            raise Exception("Something got wrong with the url pagination %s"%url)
+            raise Exception("Something got wrong with the url pagination %s" % url)
 
     def _get_page_number(self, response):
         prev = response['previous']
@@ -381,7 +388,7 @@ class Paginator(object):
     def get_page(self, page, force_update=False):
         if page not in self.pages:
             raise Exception("Page Out of Range")
-        if page in self.items and force_update == False:
+        if page in self.items and force_update is False:
             return self.items[page]
         else:
             response =  self.bridge.get("%s?page=%s"%(self.endpoint, page,)).json()
@@ -398,13 +405,14 @@ class Paginator(object):
         return self.get_last_items(self.count)
 
     def _calculate_pages_needed(self, number_of_items):
-        if self.count == 0: return []
-        num_pages = int(number_of_items/self.items_per_page)
-        res = number_of_items%self.items_per_page
-        one_more_page = 1        
+        if self.count == 0:
+            return []
+        num_pages = int(number_of_items / self.items_per_page)
+        res = number_of_items % self.items_per_page
+        one_more_page = 1
         if res:
             return self._filter_valid_pages(range(1, num_pages + 1 + one_more_page))
-        else: 
+        else:
             return self._filter_valid_pages(range(1, num_pages + 1))
 
     def get_pages(self, pages):

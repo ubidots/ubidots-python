@@ -21,11 +21,8 @@ class TestServerBridge(unittest.TestCase):
         self.serverbridge = ServerBridge(apikey)
         self.serverbridge._token_header = {'X-AUTH-TOKEN': 'the token'}
 
-
     def tearDown(self):
         ServerBridge.initialize = self.original_initialize
-
-
 
     def test_when_ServerBridge_initializes_with_key_it_asks_for_a_token(self):
         with patch('ubidots.apiclient.requests') as mock_request:
@@ -33,34 +30,32 @@ class TestServerBridge(unittest.TestCase):
             apikey = "anyapikey"
             sb = ServerBridge(apikey)
             mock_request.post.assert_called_once_with(
-                "%s%s"%(sb.base_url, "auth/token"),
-                headers = {'content-type': 'application/json', 'X-UBIDOTS-APIKEY': 'anyapikey'}
+                "%s%s" % (sb.base_url, "auth/token"),
+                headers={'content-type': 'application/json', 'X-UBIDOTS-APIKEY': 'anyapikey'}
             )
 
     def test_when_ServerBridge_initializes_with_token_it_set_it_correctly(self):
             sb = ServerBridge(token="anytoken")
             self.assertEqual(sb._token_header, {'X-AUTH-TOKEN': 'anytoken'})
 
-
-
     def test_get_includes_specific_headers(self):
         with patch('ubidots.apiclient.requests') as mock_request:
             self.serverbridge.get("any/path")
 
             mock_request.get.assert_called_once_with(
-                "%s%s"%(self.serverbridge.base_url, "any/path"),
-                headers = {'content-type': 'application/json', 'X-AUTH-TOKEN': 'the token'}
+                "%s%s" % (self.serverbridge.base_url, "any/path"),
+                headers={'content-type': 'application/json', 'X-AUTH-TOKEN': 'the token'}
             )
 
     def test_post_includes_specific_headers_and_data(self):
         with patch('ubidots.apiclient.requests') as mock_request:
-            data = {"dataone":1, "datatwo":2}
+            data = {"dataone": 1, "datatwo": 2}
             self.serverbridge.post("any/path", data)
 
             mock_request.post.assert_called_once_with(
-                "%s%s"%(self.serverbridge.base_url, "any/path"),
-                headers = {'content-type': 'application/json', 'X-AUTH-TOKEN': 'the token'},
-                data = json.dumps(data)
+                "%s%s" % (self.serverbridge.base_url, "any/path"),
+                headers={'content-type': 'application/json', 'X-AUTH-TOKEN': 'the token'},
+                data=json.dumps(data)
             )
 
     def test_delete_includes_specific_headers(self):
@@ -68,8 +63,8 @@ class TestServerBridge(unittest.TestCase):
             self.serverbridge.delete("any/path")
 
             mock_request.delete.assert_called_once_with(
-                "%s%s"%(self.serverbridge.base_url, "any/path"),
-                headers = {'content-type': 'application/json', 'X-AUTH-TOKEN': 'the token'},
+                "%s%s" % (self.serverbridge.base_url, "any/path"),
+                headers={'content-type': 'application/json', 'X-AUTH-TOKEN': 'the token'},
             )
 
 
@@ -81,27 +76,26 @@ class TestDecorators(unittest.TestCase):
         error_codes = [401]
 
         response = namedtuple('response', 'status_code')
-        fn = Mock(side_effect = [response(error_codes[0]) for i in range(10)])
+        fn = Mock(side_effect=[response(error_codes[0]) for i in range(10)])
         real_decorator = try_again(error_codes, number_of_tries=10)
-        
+
         serverbridge_mock = Mock()
         wrapper = real_decorator(fn)
-        self.assertRaises(UbidotsForbiddenError, wrapper, serverbridge_mock )
+        self.assertRaises(UbidotsForbiddenError, wrapper, serverbridge_mock)
 
     def test_raise_informative_exception_decorator(self):
         from collections import namedtuple
         error_codes = [400, 500]
         response = namedtuple('response', 'status_code')
-        fn = Mock(side_effect = [response(error_codes[0]), response(error_codes[1])])
+        fn = Mock(side_effect=[response(error_codes[0]), response(error_codes[1])])
         real_decorator = raise_informative_exception(error_codes)
         wrapper = real_decorator(fn)
-        self.assertRaises(UbidotsError400, wrapper, Mock() )
-        self.assertRaises(UbidotsError500, wrapper, Mock() )
+        self.assertRaises(UbidotsError400, wrapper, Mock())
+        self.assertRaises(UbidotsError500, wrapper, Mock())
 
     def test_raise_validate_input_decorator_dict(self):
-        fn = lambda *args, **kwargs: 911
         real_decorator = validate_input(dict, ["a", "b", "c"])
-        wrapper = real_decorator(fn)
+        wrapper = real_decorator(lambda *args, **kwargs: 911)
 
         self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [])
         self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), {})
@@ -112,9 +106,8 @@ class TestDecorators(unittest.TestCase):
         self.assertEqual(wrapper(Mock(), {"a": 1, "b": 1, "c": 1}), 911)
 
     def test_raise_validate_input_decorator_list(self):
-        fn = lambda *args, **kwargs: 911
         real_decorator = validate_input(list, ["p", "q"])
-        wrapper = real_decorator(fn)
+        wrapper = real_decorator(lambda *args, **kwargs: 911)
 
         self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), dict)
         self.assertRaises(UbidotsInvalidInputError, wrapper, Mock(), [{}])
@@ -137,10 +130,10 @@ class TestPaginator(unittest.TestCase):
             pass
 
         def fake_transform_function(items, bridge):
-            return [index for index,item in enumerate(items)]
+            return [index for index, item in enumerate(items)]
 
-        self.fakebridge = fakebridge;
-        self.fake_transform_function = fake_transform_function;
+        self.fakebridge = fakebridge
+        self.fake_transform_function = fake_transform_function
         self.response = '{"count": 12, "next": null, "previous": "the/end/point/?page = 2", "results": [{"a":1},{"a":2},{"a":3},{"a":4},{"a":5}]}'
         self.response = json.loads(self.response)
         self.endpoint = "/the/end/point/"
@@ -152,19 +145,18 @@ class TestPaginator(unittest.TestCase):
         self.assertEqual(pag.items_per_page, 5)
         self.assertEqual(pag.number_of_pages, 3)
 
-
     def test_paginator_can_ask_for_a_specific_page(self):
         PAGE = 2
         response = self.response
         response_mock = Mock()
-        response_mock.json = Mock(return_value = self.response)
+        response_mock.json = Mock(return_value=self.response)
         mock_bridge = Mock()
-        mock_bridge.get = Mock(return_value = response_mock )
+        mock_bridge.get = Mock(return_value=response_mock)
         pag = Paginator(mock_bridge, response, self.fake_transform_function, self.endpoint)
         response = pag.get_page(PAGE)
 
-        mock_bridge.get.assert_called_once_with("%s?page=%s"%(self.endpoint, PAGE),)
-        self.assertEqual(response, [0,1,2,3,4])
+        mock_bridge.get.assert_called_once_with("%s?page=%s" % (self.endpoint, PAGE),)
+        self.assertEqual(response, [0, 1, 2, 3, 4])
 
     def test_paginator_returns_exception_if_page_don_not_exist(self):
         pag = Paginator(self.fakebridge, self.response, self.fake_transform_function, self.endpoint)
@@ -173,7 +165,7 @@ class TestPaginator(unittest.TestCase):
     def test_paginator_can_ask_for_the_last_x_values(self):
         pag = Paginator(self.fakebridge, self.response, self.fake_transform_function, self.endpoint)
         pag.get_pages = Mock()
-        pag.items = {1:[{"a":1},{"a":2},{"a":3},{"a":4},{"a":5}], 2:[{"a":6},{"a":7},{"a":8},{"a":9},{"a":10}], 3:[{"a":11},{"a":12}]}
+        pag.items = {1: [{"a": 1}, {"a": 2}, {"a": 3}, {"a": 4}, {"a": 5}], 2: [{"a": 6}, {"a": 7}, {"a": 8}, {"a": 9} , {"a": 10}], 3: [{"a" :11}, {"a": 12}]}
         values = pag.get_last_items(7)
         self.assertEqual(values,[{"a":1},{"a":2},{"a":3},{"a":4},{"a":5}, {"a":6}, {"a":7}] )
 
@@ -249,5 +241,5 @@ class TestApiClient(unittest.TestCase):
 
     def test_if_bridge_is_provided_other_arguments_are_not_needed(self):
         bridge = Mock()
-        api = ApiClient(bridge = bridge)
-        self.assertEqual(api.bridge, bridge)        
+        api = ApiClient(bridge=bridge)
+        self.assertEqual(api.bridge, bridge)
