@@ -262,8 +262,7 @@ def transform_to_variable_objects(raw_variables, bridge):
 class Datasource(ApiObject):
 
     def remove_datasource(self):
-        response = self.bridge.delete('datasources/' + self.id)
-        return response
+        return self.bridge.delete('datasources/' + self.id) == 204
 
     def get_variables(self, numofvars="ALL"):
         endpoint = 'datasources/' + self.id + '/variables'
@@ -323,10 +322,10 @@ class Variable(ApiObject):
         return all(map(lambda x: x['status_code'] == 201, data))
 
     def remove_variable(self):
-        return self.bridge.delete('variables/' + self.id).json()
+        return self.bridge.delete('variables/' + self.id).status_code == 204
 
     def remove_values(self, t_start, t_end):
-        return self.bridge.delete('variables/%s/values/%s/%s' % (self.id, t_start, t_end)).json()
+        return self.bridge.delete('variables/%s/values/%s/%s') % (self.id, t_start, t_end)
 
     def get_datasource(self, **kwargs):
         if not self._datasource:
