@@ -49,8 +49,16 @@ Once you have your token, you can connect to the API by creating an ApiClient in
 
     api = ApiClient(token='f9iP6BpxpviO06EbebukACqEZcQMtM')
 
+Now you have an instance of ApiClient ("api") which can be used to connect to the API service. 
 
-Now you have an instance of ApiClient ("api") which can be used to connect to the API service.
+If you're using an independent container, you'll have to chane the API BASE URL:
+
+.. code-block:: python
+
+    from ubidots import ApiClient
+
+    api = ApiClient(token="4b00-xxxxxxxxxxxxxxxxxxx", base_url="http://yourcompanyname.api.ubidots.com/api/v1.6/")
+
 
 Saving a Value to a Variable
 ----------------------------
@@ -66,6 +74,12 @@ Given the instantiated variable, you can save a new value with the following lin
 .. code-block:: python
 
     new_value = my_variable.save_value({'value': 10})
+    
+Here we'll send some GPS coordinates as an example:
+
+.. code-block:: python
+
+    new_value = my_variable.save_value({'value':10, 'context':{'lat': 33.0822, 'lng': -117.24123}})
 
 You can also specify a timestamp (optional):
 
