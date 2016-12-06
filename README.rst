@@ -49,9 +49,7 @@ Once you have your token, you can connect to the API by creating an ApiClient in
 
     api = ApiClient(token='f9iP6BpxpviO06EbebukACqEZcQMtM')
 
-Now you have an instance of ApiClient ("api") which can be used to connect to the API service. 
-
-If you're using an independent container, you'll have to chane the API BASE URL:
+If you're using an independent container, you'll have to chagne the API BASE URL:
 
 .. code-block:: python
 
@@ -59,6 +57,7 @@ If you're using an independent container, you'll have to chane the API BASE URL:
 
     api = ApiClient(token="4b00-xxxxxxxxxxxxxxxxxxx", base_url="http://yourcompanyname.api.ubidots.com/api/v1.6/")
 
+Now you have an instance of ApiClient ("api") which can be used to connect to the API service. 
 
 Saving a Value to a Variable
 ----------------------------
@@ -126,7 +125,7 @@ To save several values to a single variable:
 .. code-block:: python
 
    new_variable.save_values([
-       {'timestamp': 1380558972614, 'value': 20},
+       {'timestamp': 1380558972614, 'value': 20,'context':{'lat': 33.0822, 'lng': -117.24123}},
        {'timestamp': 1380558972915, 'value': 40},
        {'timestamp': 1380558973516, 'value': 50},
        {'timestamp': 1380558973617, 'value': 30}
