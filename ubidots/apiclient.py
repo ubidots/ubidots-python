@@ -346,7 +346,7 @@ class Paginator(object):
         self.transform_function = transform_function
         self.items_per_page = self._get_number_of_items_per_page()
         self.number_of_pages = self._get_number_of_pages()
-        self.pages = range(1, self.number_of_pages + 1)
+        self.pages = list(range(1, self.number_of_pages + 1))
         self.items = {}
         self.add_new_items(1, response)
 
