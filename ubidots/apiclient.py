@@ -325,7 +325,13 @@ class Variable(ApiObject):
         return self.bridge.delete('variables/' + self.id).status_code == 204
 
     def remove_values(self, t_start, t_end):
-        return self.bridge.delete('variables/%s/values/%s/%s') % (self.id, t_start, t_end)
+        return self.bridge.delete('variables/{0}/values/{1}/{2}'.format(self.id, t_start, t_end))
+
+    def remove_all_values(self):
+        from time import time
+        t_start = 0
+        t_end = int(time()) * 1000
+        return self.remove_values(t_start=t_start, t_end=t_end)
 
     def get_datasource(self, **kwargs):
         if not self._datasource:
