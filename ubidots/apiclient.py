@@ -396,7 +396,13 @@ class Paginator(object):
         if page in self.items and force_update is False:
             return self.items[page]
         else:
-            response =  self.bridge.get("%s?page=%s"%(self.endpoint, page,)).json()
+            try:
+                response = self.bridge.get("%s?page=%s" %
+                                           (self.endpoint, page,)).json()
+            except JSONDecodeError:
+                # When the server returns something that is not JSON decodable
+                # this will crash.
+                raise UbidotsHTTPError("Invalid response from the server")
             self.add_new_items(page, response)
             return self.items[page]
 
