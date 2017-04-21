@@ -180,7 +180,7 @@ class TestPaginator(unittest.TestCase):
     def test_paginator_can_ask_for_the_range_of_pages(self):
         response = self.response
         pag = Paginator(self.fakebridge, response, self.fake_transform_function, self.endpoint)
-        self.assertEqual(pag.pages, [1,2,3])
+        self.assertEqual(pag.pages, [1, 2, 3])
 
 
     def test_paginator_make_the_custom_transformation(self):
@@ -216,9 +216,9 @@ class TestDatasource(unittest.TestCase):
         ds_id = 'any_id'
         endpoint = 'datasources/' + ds_id + '/variables'
         raw_ds = {"id": ds_id, "name":"testds", "tags":['a', 'b', 'c'], "description":"the description"}
-        bridge = Mock()
+        bridge = MagicMock()
         ds = Datasource(raw_ds, bridge)
-        ds.get_new_paginator = Mock()
+        ds.get_new_paginator = MagicMock()
         ds.get_variables()
         bridge.get.assert_called_once_with(endpoint)
 
@@ -226,9 +226,9 @@ class TestDatasource(unittest.TestCase):
         ds_id = 'any_id'
         endpoint = 'datasources/' + ds_id + '/variables'
         raw_ds = {"id": ds_id, "name":"testds", "tags":['a', 'b', 'c'], "description":"the description"}
-        bridge = Mock()
+        bridge = MagicMock()
         ds = Datasource(raw_ds, bridge)
-        ds.get_new_paginator = Mock()
+        ds.get_new_paginator = MagicMock()
         ds.get_variables()
         ds.get_new_paginator.assert_called_once_with(bridge, ANY, ANY, endpoint)
 
