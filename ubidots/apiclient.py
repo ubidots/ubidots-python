@@ -292,7 +292,10 @@ class Variable(ApiObject):
 
     def get_values(self, numofvals="ALL"):
         endpoint = 'variables/' + self.id + '/values'
-        response = self.bridge.get(endpoint).json()
+        kwargs = {}
+        if isinstance(numofvals, int):
+            kwargs["params"] = {"page_size": str(numofvals)}
+        response = self.bridge.get(endpoint, **kwargs).json()
         pag = Paginator(self.bridge, response, self.get_transform_function(), endpoint)
         return InfoList(pag, numofvals)
 
