@@ -10,13 +10,10 @@ class Client(requests.Session):
         super().__init__()
         self._base_url = base_url
         self._api_ver = api_ver
+        self._api_url = urljoin(self._base_url, f"api/{self._api_ver}/")
 
     def __del__(self):
         self.close()
-
-    @property
-    def _api_url(self):
-        return urljoin(self._base_url, f"api/{self._api_ver}/")
 
     def _handle_response_code(self, code):
         errors = {
