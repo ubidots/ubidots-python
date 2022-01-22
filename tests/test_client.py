@@ -226,3 +226,29 @@ def test__raise_exception_on_415_unsupported_media_type(
         match=r"^415 Unsupported Media Type",
     ):
         response = request_func(ENDPOINT)
+
+
+@pytest.mark.parametrize("request_verb", REQUEST_VERBS)
+def test__raise_exception_on_5xx_server_error(mocked_responses, request_verb):
+    TOKEN = "my-token"
+    API_URL = f"{ubidots.base_url}/api/{ubidots.api_ver}"
+    ENDPOINT = "endpoint"
+
+    ubidots.token = TOKEN
+
+    request_func = getattr(api_client, request_verb.lower())
+    mocked_verb = getattr(responses, request_verb.upper())
+    mocked_responses.add(
+        mocked_verb,
+        f"{API_URL}/{ENDPOINT}",
+        status=500,
+        headers={"Content-Type": "application/json"},
+        json={
+            "code": 500001,
+            "message": "500 Server Error",
+            "detail": "",
+        },
+    )
+
+    with pytest.raises(ubidots.ApiErrorServer, match=r"^500 Server Error"):
+        response = request_func(ENDPOINT)
