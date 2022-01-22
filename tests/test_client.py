@@ -25,6 +25,14 @@ def test__auth_header(mocked_responses, request_verb):
     assert 200 == response.status_code
     assert "X-Auth-Token" in response.request.headers
     assert TOKEN == response.request.headers["X-Auth-Token"]
+    
+    ubidots.token = "other-token"
+    
+    response = request_func(ENDPOINT)
+
+    assert 200 == response.status_code
+    assert "X-Auth-Token" in response.request.headers
+    assert "other-token" == response.request.headers["X-Auth-Token"]
 
 
 @pytest.mark.parametrize("request_verb", REQUEST_VERBS)
