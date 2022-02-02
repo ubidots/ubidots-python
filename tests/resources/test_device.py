@@ -2,9 +2,9 @@ import json
 import pytest
 import responses
 
-from datetime import datetime, tzinfo
+from datetime import datetime, timezone
 
-from src import ubidots
+import ubidots
 
 
 @pytest.fixture
@@ -52,7 +52,8 @@ def test__retrieve_device(mocked_responses, fake_devices):
         json=RESPONSE,
     )
 
-    ubidots.token = TOKEN
+    ubidots.config.token = TOKEN
+    print("ubidots.config.token", id(ubidots.config.token))
     device = ubidots.Device.retrieve(label=DEVICE_LABEL)
 
     assert "X-Auth-Token" in mocked_responses.calls[0].request.headers
@@ -74,7 +75,7 @@ def test__create_device(mocked_responses, fake_devices):
         json=RESPONSE,
     )
 
-    ubidots.token = TOKEN
+    ubidots.config.token = TOKEN
     device = ubidots.Device.create(label=DEVICE_LABEL)
 
     assert "X-Auth-Token" in mocked_responses.calls[0].request.headers

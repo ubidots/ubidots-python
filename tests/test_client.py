@@ -1,8 +1,8 @@
 import pytest
 import responses
 
-from src import ubidots
-from src.ubidots.client import api_client
+import ubidots
+from ubidots import api_client
 
 
 REQUEST_VERBS = ["GET", "POST", "PATCH", "PUT", "DELETE"]
@@ -11,10 +11,10 @@ REQUEST_VERBS = ["GET", "POST", "PATCH", "PUT", "DELETE"]
 @pytest.mark.parametrize("request_verb", REQUEST_VERBS)
 def test__auth_header(mocked_responses, request_verb):
     TOKEN = "my-token"
-    API_URL = f"{ubidots.base_url}/api/{ubidots.api_ver}"
+    API_URL = f"{ubidots.config.base_url}/api/{ubidots.config.api_ver}"
     ENDPOINT = "endpoint"
 
-    ubidots.token = TOKEN
+    ubidots.config.token = TOKEN
 
     request_func = getattr(api_client, request_verb.lower())
     mocked_verb = getattr(responses, request_verb.upper())
@@ -25,9 +25,9 @@ def test__auth_header(mocked_responses, request_verb):
     assert 200 == response.status_code
     assert "X-Auth-Token" in response.request.headers
     assert TOKEN == response.request.headers["X-Auth-Token"]
-    
-    ubidots.token = "other-token"
-    
+
+    ubidots.config.token = "other-token"
+
     response = request_func(ENDPOINT)
 
     assert 200 == response.status_code
@@ -38,10 +38,10 @@ def test__auth_header(mocked_responses, request_verb):
 @pytest.mark.parametrize("request_verb", REQUEST_VERBS)
 def test__raise_exception_on_400_bad_request(mocked_responses, request_verb):
     TOKEN = "my-token"
-    API_URL = f"{ubidots.base_url}/api/{ubidots.api_ver}"
+    API_URL = f"{ubidots.config.base_url}/api/{ubidots.config.api_ver}"
     ENDPOINT = "endpoint"
 
-    ubidots.token = TOKEN
+    ubidots.config.token = TOKEN
 
     request_func = getattr(api_client, request_verb.lower())
     mocked_verb = getattr(responses, request_verb.upper())
@@ -60,10 +60,10 @@ def test__raise_exception_on_400_bad_request(mocked_responses, request_verb):
 @pytest.mark.parametrize("request_verb", REQUEST_VERBS)
 def test__raise_exception_on_401_unauthorized(mocked_responses, request_verb):
     TOKEN = "my-token"
-    API_URL = f"{ubidots.base_url}/api/{ubidots.api_ver}"
+    API_URL = f"{ubidots.config.base_url}/api/{ubidots.config.api_ver}"
     ENDPOINT = "endpoint"
 
-    ubidots.token = TOKEN
+    ubidots.config.token = TOKEN
 
     request_func = getattr(api_client, request_verb.lower())
     mocked_verb = getattr(responses, request_verb.upper())
@@ -86,10 +86,10 @@ def test__raise_exception_on_402_payment_required(
     mocked_responses, request_verb
 ):
     TOKEN = "my-token"
-    API_URL = f"{ubidots.base_url}/api/{ubidots.api_ver}"
+    API_URL = f"{ubidots.config.base_url}/api/{ubidots.config.api_ver}"
     ENDPOINT = "endpoint"
 
-    ubidots.token = TOKEN
+    ubidots.config.token = TOKEN
 
     request_func = getattr(api_client, request_verb.lower())
     mocked_verb = getattr(responses, request_verb.upper())
@@ -110,10 +110,10 @@ def test__raise_exception_on_402_payment_required(
 @pytest.mark.parametrize("request_verb", REQUEST_VERBS)
 def test__raise_exception_on_403_forbidden(mocked_responses, request_verb):
     TOKEN = "my-token"
-    API_URL = f"{ubidots.base_url}/api/{ubidots.api_ver}"
+    API_URL = f"{ubidots.config.base_url}/api/{ubidots.config.api_ver}"
     ENDPOINT = "endpoint"
 
-    ubidots.token = TOKEN
+    ubidots.config.token = TOKEN
 
     request_func = getattr(api_client, request_verb.lower())
     mocked_verb = getattr(responses, request_verb.upper())
@@ -132,10 +132,10 @@ def test__raise_exception_on_403_forbidden(mocked_responses, request_verb):
 @pytest.mark.parametrize("request_verb", REQUEST_VERBS)
 def test__raise_exception_on_404_page_not_found(mocked_responses, request_verb):
     TOKEN = "my-token"
-    API_URL = f"{ubidots.base_url}/api/{ubidots.api_ver}"
+    API_URL = f"{ubidots.config.base_url}/api/{ubidots.config.api_ver}"
     ENDPOINT = "endpoint"
 
-    ubidots.token = TOKEN
+    ubidots.config.token = TOKEN
 
     request_func = getattr(api_client, request_verb.lower())
     mocked_verb = getattr(responses, request_verb.upper())
@@ -158,10 +158,10 @@ def test__raise_exception_on_405_method_not_allowed(
     mocked_responses, request_verb
 ):
     TOKEN = "my-token"
-    API_URL = f"{ubidots.base_url}/api/{ubidots.api_ver}"
+    API_URL = f"{ubidots.config.base_url}/api/{ubidots.config.api_ver}"
     ENDPOINT = "endpoint"
 
-    ubidots.token = TOKEN
+    ubidots.config.token = TOKEN
 
     request_func = getattr(api_client, request_verb.lower())
     mocked_verb = getattr(responses, request_verb.upper())
@@ -186,10 +186,10 @@ def test__raise_exception_on_405_method_not_allowed(
 @pytest.mark.parametrize("request_verb", REQUEST_VERBS)
 def test__raise_exception_on_409_conflict(mocked_responses, request_verb):
     TOKEN = "my-token"
-    API_URL = f"{ubidots.base_url}/api/{ubidots.api_ver}"
+    API_URL = f"{ubidots.config.base_url}/api/{ubidots.config.api_ver}"
     ENDPOINT = "endpoint"
 
-    ubidots.token = TOKEN
+    ubidots.config.token = TOKEN
 
     request_func = getattr(api_client, request_verb.lower())
     mocked_verb = getattr(responses, request_verb.upper())
@@ -210,10 +210,10 @@ def test__raise_exception_on_415_unsupported_media_type(
     mocked_responses, request_verb
 ):
     TOKEN = "my-token"
-    API_URL = f"{ubidots.base_url}/api/{ubidots.api_ver}"
+    API_URL = f"{ubidots.config.base_url}/api/{ubidots.config.api_ver}"
     ENDPOINT = "endpoint"
 
-    ubidots.token = TOKEN
+    ubidots.config.token = TOKEN
 
     request_func = getattr(api_client, request_verb.lower())
     mocked_verb = getattr(responses, request_verb.upper())
@@ -239,10 +239,10 @@ def test__raise_exception_on_415_unsupported_media_type(
 @pytest.mark.parametrize("request_verb", REQUEST_VERBS)
 def test__raise_exception_on_5xx_server_error(mocked_responses, request_verb):
     TOKEN = "my-token"
-    API_URL = f"{ubidots.base_url}/api/{ubidots.api_ver}"
+    API_URL = f"{ubidots.config.base_url}/api/{ubidots.config.api_ver}"
     ENDPOINT = "endpoint"
 
-    ubidots.token = TOKEN
+    ubidots.config.token = TOKEN
 
     request_func = getattr(api_client, request_verb.lower())
     mocked_verb = getattr(responses, request_verb.upper())
