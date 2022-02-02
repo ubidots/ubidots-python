@@ -1,1 +1,1 @@
-from src.ubidots.mixins.requests_mixin import RequestsMixin
+from .requests_mixin import RequestsMixin

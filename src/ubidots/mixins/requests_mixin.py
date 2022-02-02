@@ -1,4 +1,4 @@
-from src.ubidots.client import api_client
+from .. import api_client
 
 
 class RequestsMixin:

@@ -1,1 +1,1 @@
-from src.ubidots.resources.device import Device
+from .device import Device

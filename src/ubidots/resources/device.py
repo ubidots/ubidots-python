@@ -1,5 +1,5 @@
-from src.ubidots.mixins import RequestsMixin
-from src.ubidots.resource import Resource
+from ..mixins import RequestsMixin
+from ..resource import Resource
 
 
 class Device(RequestsMixin):
