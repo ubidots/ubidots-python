@@ -1,8 +1,8 @@
 import json
+from datetime import datetime, timezone
+
 import pytest
 import responses
-
-from datetime import datetime, timezone
 
 import ubidots
 

@@ -4,7 +4,6 @@ import responses
 import ubidots
 from ubidots import api_client
 
-
 REQUEST_VERBS = ["GET", "POST", "PATCH", "PUT", "DELETE"]
 
 

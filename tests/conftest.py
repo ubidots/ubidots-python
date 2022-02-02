@@ -1,6 +1,5 @@
 import pytest
 import responses
-
 from faker.providers import company, internet, lorem
 
 
