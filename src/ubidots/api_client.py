@@ -1,3 +1,4 @@
+import atexit
 from urllib.parse import urljoin
 
 import requests
@@ -10,7 +11,7 @@ def __getattr__(name: str):
     return getattr(_session, name)
 
 
-def _handle_response_code(code):
+def _handle_response_code(code: int):
     errors = {
         400: ApiErrorBadRequest,
         401: ApiErrorUnauthorized,
@@ -41,3 +42,5 @@ def request(method: str, path: str, **kwargs):
 _api_url = urljoin(config.base_url, f"api/{config.api_ver}/")
 _session = requests.Session()
 _request, _session.request = _session.request, request
+
+atexit.register(_session.close)
