@@ -1,5 +1,4 @@
-from ..mixins import RequestsMixin
-from ..resource import Resource
+from ..mixins import ApiResourceMixin, RequestsMixin
 
 
 class Device(RequestsMixin):
@@ -8,25 +7,25 @@ class Device(RequestsMixin):
     @classmethod
     def create(cls, **props):
         device = cls.post(f"{cls._plural}", props)
-        return Resource(device)
+        return ApiResourceMixin(device)
 
     @classmethod
     def modify(cls, **props):
         key = cls._entity_key(props.get("id"), props.get("label"))
         device = cls.patch(f"{cls._plural}/{key}", props)
-        return Resource(device)
+        return ApiResourceMixin(device)
 
     @classmethod
     def update(cls, **props):
         key = cls._entity_key(props.get("id"), props.get("label"))
         device = cls.put(f"{cls._plural}/{key}", props)
-        return Resource(device)
+        return ApiResourceMixin(device)
 
     @classmethod
     def retrieve(cls, **props):
         key = cls._entity_key(props.get("id"), props.get("label"))
         device = cls.get(f"{cls._plural}/{key}", props)
-        return Resource(device)
+        return ApiResourceMixin(device)
 
     @classmethod
     def delete(cls, id: str = "", label: str = ""):
