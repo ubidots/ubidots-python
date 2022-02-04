@@ -4,13 +4,19 @@ import pytest
 
 from ubidots.api_client import _api_url
 
-DEFAULT_FIELDS = ["url", "id", "label", "name", "createdAt"]
+
+@pytest.fixture
+def fake_id(faker):
+    def _fake_id():
+        return faker.unique.hexify(text="".join(["^"] * 24))
+
+    return _fake_id
 
 
 @pytest.fixture
-def fake_device(faker):
-    def _fake_device(fields: list = [], **kwargs):
-        device_id = faker.unique.hexify(text="".join(["^"] * 24))
+def fake_device(faker, fake_id):
+    def _fake_device(fields: list = [], **props):
+        device_id = fake_id()
         device = {
             "url": urljoin(_api_url, f"devices/{device_id}"),
             "id": device_id,
@@ -28,7 +34,7 @@ def fake_device(faker):
             "variables": urljoin(_api_url, f"devices/{device_id}/variables"),
             "variablesCount": 0,
         }
-        for key, val in kwargs.items():
+        for key, val in props.items():
             device[key] = val
         return {k: v for k, v in device.items() if not fields or k in fields}
 
@@ -37,7 +43,8 @@ def fake_device(faker):
 
 @pytest.fixture
 def fake_devices(faker, fake_device):
-    def _fake_devices(count: int = 1, fields: list = [], **kwargs):
-        return [fake_device(fields, **kwargs) for _ in range(count)]
+    def _fake_devices(count: int = 1, fields: list = [], props: list = []):
+        props_it = iter(props)
+        return [fake_device(fields, **next(props_it, {})) for _ in range(count)]
 
     return _fake_devices
