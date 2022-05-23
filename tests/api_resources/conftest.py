@@ -2,7 +2,7 @@ from urllib.parse import urljoin
 
 import pytest
 
-from ubidots.api_client import _api_url
+import ubidots
 
 
 @pytest.fixture
@@ -16,9 +16,10 @@ def fake_id(faker):
 @pytest.fixture
 def fake_device(faker, fake_id):
     def _fake_device(fields: list = [], **props):
+        api_url = urljoin(ubidots.base_url, f"api/{ubidots.api_ver}/")
         device_id = fake_id()
         device = {
-            "url": urljoin(_api_url, f"devices/{device_id}"),
+            "url": urljoin(api_url, f"devices/{device_id}"),
             "id": device_id,
             "organization": None,
             "label": faker.unique.slug(),
@@ -31,7 +32,7 @@ def fake_device(faker, fake_id):
             "isActive": True,
             "lastActivity": 0,
             "createdAt": "",
-            "variables": urljoin(_api_url, f"devices/{device_id}/variables"),
+            "variables": urljoin(api_url, f"devices/{device_id}/variables"),
             "variablesCount": 0,
         }
         for key, val in props.items():
