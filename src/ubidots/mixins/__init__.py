@@ -1,2 +1,2 @@
-from .api_resource_mixin import ApiResourceMixin
-from .requests_mixin import RequestsMixin
+from ubidots.mixins.api_resource_mixin import ApiResourceMixin
+from ubidots.mixins.requests_mixin import RequestsMixin

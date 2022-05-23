@@ -1,4 +1,4 @@
-from .. import api_client
+from ubidots import api_client
 
 
 class RequestsMixin:
