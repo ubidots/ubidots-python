@@ -1,5 +1,4 @@
 import json
-from datetime import datetime, timezone
 
 import pytest
 import responses
@@ -10,7 +9,9 @@ import ubidots
 @pytest.fixture(autouse=True)
 def set_token(mocked_responses):
     TOKEN = "test-token"
-    ubidots.config.token = TOKEN
+    ubidots.token = TOKEN
+    ubidots.base_url = "https://industrial.api.ubidots.com"
+    ubidots.api_ver = "v2.0"
     yield
     for call in mocked_responses.calls:
         assert call.request.headers.items() >= {"X-Auth-Token": TOKEN}.items()
@@ -86,3 +87,19 @@ def test__retrieve_device_by_label(mocked_responses, fake_device):
     for key, val in DEVICE.items():
         assert hasattr(device, key)
         assert getattr(device, key) == val
+
+
+def test__list_devices(mocked_responses, fake_devices):
+    DEVICES = fake_devices(10)
+    mocked_responses.add(
+        responses.GET,
+        f"https://industrial.api.ubidots.com/api/v2.0/devices",
+        status=200,
+        headers={"Content-Type": "application/json"},
+        json={"count": 10, "previous": None, "next": None, "results": DEVICES},
+    )
+
+    devices = ubidots.Device.list()
+    
+    for device in devices:
+        assert isinstance(device, ubidots.mixins.ApiResourceMixin)
