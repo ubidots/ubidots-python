@@ -3,8 +3,8 @@ from urllib.parse import urljoin
 
 import requests
 
-from . import config
-from .error import *
+import ubidots
+from ubidots.error import *
 
 
 def __getattr__(name: str):
@@ -29,8 +29,9 @@ def _handle_response_code(code: int):
 
 
 def request(method: str, path: str, **kwargs):
-    url = urljoin(_api_url, path)
-    headers = {"X-Auth-Token": config.token}
+    api_url = urljoin(ubidots.base_url, f"api/{ubidots.api_ver}/")
+    url = urljoin(api_url, path)
+    headers = {"X-Auth-Token": ubidots.token}
     rsp = _request(method, url, headers=headers, **kwargs)
     try:
         rsp.raise_for_status()
@@ -39,8 +40,8 @@ def request(method: str, path: str, **kwargs):
     return rsp
 
 
-_api_url = urljoin(config.base_url, f"api/{config.api_ver}/")
 _session = requests.Session()
+_session.mount("https://", requests.adapters.HTTPAdapter(max_retries=5))
 _request, _session.request = _session.request, request
 
 atexit.register(_session.close)
