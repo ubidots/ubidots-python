@@ -1,7 +1,7 @@
 from ubidots.mixins import ApiResourceMixin, RequestsMixin
 
 
-class Variable(RequestsMixin):
+class Variables(RequestsMixin):
     _plural = "variables"
 
     @classmethod

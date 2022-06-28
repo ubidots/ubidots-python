@@ -46,7 +46,7 @@ def test__create_device(mocked_responses, fake_device, props):
         match=[responses.matchers.json_params_matcher(props)],
     )
 
-    device = ubidots.Device.create(**props)
+    device = ubidots.Devices.create(**props)
 
     for key, val in props.items():
         assert hasattr(device, key)
@@ -64,7 +64,7 @@ def test__retrieve_device_by_id(mocked_responses, fake_device):
         json=DEVICE,
     )
 
-    device = ubidots.Device.retrieve(id=DEVICE_ID)
+    device = ubidots.Devices.retrieve(id=DEVICE_ID)
 
     for key, val in DEVICE.items():
         assert hasattr(device, key)
@@ -82,7 +82,7 @@ def test__retrieve_device_by_label(mocked_responses, fake_device):
         json=DEVICE,
     )
 
-    device = ubidots.Device.retrieve(label=DEVICE_LABEL)
+    device = ubidots.Devices.retrieve(label=DEVICE_LABEL)
 
     for key, val in DEVICE.items():
         assert hasattr(device, key)
@@ -99,7 +99,7 @@ def test__list_devices(mocked_responses, fake_devices):
         json={"count": 10, "previous": None, "next": None, "results": DEVICES},
     )
 
-    devices = ubidots.Device.list()
-    
+    devices = ubidots.Devices.list()
+
     for device in devices:
         assert isinstance(device, ubidots.mixins.ApiResourceMixin)

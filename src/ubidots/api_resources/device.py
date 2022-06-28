@@ -1,7 +1,7 @@
 from ubidots.mixins import ApiResourceMixin, RequestsMixin
 
 
-class Device(RequestsMixin):
+class Devices(RequestsMixin):
     _plural = "devices"
 
     @classmethod
