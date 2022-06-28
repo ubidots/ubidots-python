@@ -28,8 +28,9 @@ def _handle_response_code(code: int):
     raise errors.get(code, ApiErrorBadRequest)
 
 
-def request(method: str, path: str, **kwargs):
-    api_url = urljoin(ubidots.base_url, f"api/{ubidots.api_ver}/")
+def request(method: str, path: str, api_ver: str = None, **kwargs):
+    api_ver = ubidots.api_ver if api_ver is None else api_ver
+    api_url = urljoin(ubidots.base_url, f"api/{api_ver}/")
     url = urljoin(api_url, path)
     headers = {"X-Auth-Token": ubidots.token}
     rsp = _request(method, url, headers=headers, **kwargs)
