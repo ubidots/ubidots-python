@@ -10,6 +10,11 @@ class Devices(RequestsMixin):
         return [ApiResourceMixin(device) for device in devices]
 
     @classmethod
+    def new(cls, **props):
+        device = ApiResourceMixin(props)
+        return device
+
+    @classmethod
     def create(cls, **props):
         device = cls.post(f"{cls._plural}", props)
         return ApiResourceMixin(device)
