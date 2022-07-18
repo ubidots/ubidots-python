@@ -1,3 +1,5 @@
+import inspect
+
 from ubidots.mixins import ApiResourceMixin, RequestsMixin
 
 
@@ -8,6 +10,14 @@ class Variables(RequestsMixin):
     def list(cls, **filters):
         variables = cls.get(cls._plural, filters).get("results", [])
         return [ApiResourceMixin(**variable) for variable in variables]
+
+    @classmethod
+    def new(cls, **props):
+        device = inspect.currentframe().f_back.f_locals.get("device")
+        if device:
+            props.update({"device": device})
+        variable = ApiResourceMixin(**props)
+        return variable
 
     @classmethod
     def create(cls, **props):
