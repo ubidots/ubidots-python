@@ -14,6 +14,12 @@ from ubidots.exceptions import (
 
 @pytest.fixture
 def http():
+    """
+    Provide a configured HttpClient instance for tests.
+    
+    Returns:
+        HttpClient: an HttpClient initialized with the token "test-token".
+    """
     return HttpClient("test-token")
 
 
@@ -31,6 +37,16 @@ class TestHttpClientInit:
 
 class TestRaiseForStatus:
     def _response(self, status_code, text="error detail"):
+        """
+        Create a MagicMock representing an HTTP response with the given status and text.
+        
+        Parameters:
+            status_code (int): HTTP status code to set on the mock response.
+            text (str): Response body text to set on the mock response.
+        
+        Returns:
+            MagicMock: A mock response with `ok` set to True for status codes < 400, and `status_code` and `text` attributes set accordingly.
+        """
         resp = MagicMock()
         resp.ok = status_code < 400
         resp.status_code = status_code

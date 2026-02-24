@@ -2,6 +2,15 @@ from setuptools import setup, find_packages
 
 
 def read_file(name):
+    """
+    Read and return the entire contents of a text file.
+    
+    Parameters:
+        name (str): Path to the file to read.
+    
+    Returns:
+        contents (str): The file contents as a string.
+    """
     with open(name, "r") as f:
         return f.read()
 
