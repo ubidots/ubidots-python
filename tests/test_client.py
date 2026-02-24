@@ -7,6 +7,12 @@ from ubidots.client import Ubidots
 
 @pytest.fixture
 def api():
+    """
+    Pytest fixture that provides a Ubidots client with its HttpClient replaced by a mock.
+    
+    Returns:
+        Ubidots: A Ubidots instance whose internal HTTP client (`_http`) is the mocked HttpClient for use in tests.
+    """
     with patch("ubidots.client.HttpClient") as MockHttp:
         client = Ubidots("test-token")
         client._http = MockHttp.return_value
