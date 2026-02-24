@@ -1,41 +1,45 @@
 from setuptools import setup, find_packages
-import multiprocessing # http://bugs.python.org/issue15881#msg170215
+
 
 def read_file(name):
     with open(name, "r") as f:
         return f.read()
 
+
 setup(
-    name='ubidots',
-    version='1.6.6',
-    author='Ubidots Team',
-    author_email='devel@ubidots.com',
-    url='https://github.com/ubidots/ubidots-python/',
-    license='MIT',
-    description='Api Client to connect to ubidots.com api version 1.6',
-    long_description=read_file("README.rst"),
-    platforms='any',
-    packages=find_packages(),
+    name="ubidots",
+    version="2.0.0",
+    author="Ubidots Team",
+    author_email="devel@ubidots.com",
+    url="https://github.com/ubidots/ubidots-python/",
+    license="MIT",
+    description="Python client for the Ubidots API v2.0",
+    long_description=read_file("README.md"),
+    long_description_content_type="text/markdown",
+    platforms="any",
+    packages=find_packages(exclude=["tests"]),
+    python_requires=">=3.8",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.5",
-        "Programming Language :: Python :: 2.6",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Software Development :: Libraries :: Python Modules",
-        "Topic :: System :: Hardware"
+        "Topic :: System :: Hardware",
     ],
     install_requires=[
-        "requests >= 2.5.1",
+        "requests>=2.20.0",
     ],
-    test_suite='nose.collector',
-    tests_require=[
-        'mock >= 1.0.1',
-        'nose >= 1.3.0',
-        'requests >= 2.5.1'
-    ]
+    extras_require={
+        "dev": [
+            "pytest>=7.0",
+        ],
+    },
 )
